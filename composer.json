@@ -27,7 +27,7 @@
     "php": ">=8.2",
     "ext-json": "*",
     "ext-zlib": "*",
-    "saloonphp/saloon": "3.11",
+    "saloonphp/saloon": "^4.0",
     "saloonphp/rate-limit-plugin": "^2.0"
   },
   "require-dev": {
