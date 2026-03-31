@@ -2,7 +2,7 @@
   "name": "dru1x/expo-server-sdk-php",
   "description": "Server-side library for working with the Expo push notification service using PHP 8.2+",
   "keywords": ["expo", "push", "php", "expo-server-sdk-php"],
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "library",
   "license": "MIT",
   "homepage": "https://github.com/dru1x/expo-server-sdk-php",
@@ -27,7 +27,7 @@
     "php": ">=8.2",
     "ext-json": "*",
     "ext-zlib": "*",
-    "saloonphp/saloon": "3.11",
+    "saloonphp/saloon": "^4.0",
     "saloonphp/rate-limit-plugin": "^2.0"
   },
   "require-dev": {
