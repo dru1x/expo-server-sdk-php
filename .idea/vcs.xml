@@ -9,7 +9,9 @@
   </component>
   <component name="GitSharedSettings">
     <option name="FORCE_PUSH_PROHIBITED_PATTERNS">
-      <list />
+      <list>
+        <option value="main" />
+      </list>
     </option>
   </component>
   <component name="VcsDirectoryMappings">
