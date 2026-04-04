@@ -2,6 +2,7 @@
 
 /** @noinspection PhpUnhandledExceptionInspection */
 
+use Composer\InstalledVersions;
 use Dru1x\ExpoPush\ExpoPush;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
@@ -23,6 +24,7 @@ use Saloon\Http\Faking\MockResponse;
 class ExpoPushTest extends TestCase
 {
     protected MockClient $mockClient;
+    protected ExpoPush $service;
 
     protected function setUp(): void
     {
@@ -491,7 +493,10 @@ class ExpoPushTest extends TestCase
             file_get_contents(dirname(__DIR__, 2) . '/composer.json')
         );
 
-        $this->assertEquals($composer->version, $this->service->sdkVersion());
+        $this->assertSame(
+            InstalledVersions::getPrettyVersion($composer->name),
+            $this->service->sdkVersion()
+        );
     }
 
     // Helpers ----

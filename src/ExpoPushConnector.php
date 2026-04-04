@@ -2,6 +2,7 @@
 
 namespace Dru1x\ExpoPush;
 
+use Composer\InstalledVersions;
 use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\Connector;
 use Saloon\RateLimitPlugin\Contracts\RateLimitStore;
@@ -55,7 +56,7 @@ final class ExpoPushConnector extends Connector
             file_get_contents(dirname(__DIR__) . '/composer.json')
         );
 
-        return $composer->version ?? 'unknown';
+        return InstalledVersions::getPrettyVersion($composer->name);
     }
 
     // Internals ----
