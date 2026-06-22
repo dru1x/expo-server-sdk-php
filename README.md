@@ -1,8 +1,37 @@
-# Expo Push Server SDK (PHP)
+<p align="center">
+    <img src="art/banner.svg" alt="Laravel Expo Push" width="100%">
+</p>
 
+# Server-side library for Expo's Push Server
+
+[![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 ![Test Workflow Status](https://github.com/Dru1X/expo-server-sdk-php/workflows/Test/badge.svg)
 
-Server-side library for working with the Expo Push service using PHP 8.2+
+This is a PHP 8.2+ SDK for working with 
+[Expo's Push Notification service](https://docs.expo.dev/push-notifications/overview/). It provides a clean, typed 
+interface around Expo's HTTP/2 Push API, handling the details of batching, concurrency, and rate limiting so you don't 
+have to.
+
+**Key features:**
+
+- **Send notifications**  
+  Pass any number of `PushMessage` objects to `sendNotifications()`. The library automatically
+  chunks them into appropriately sized requests and sends those concurrently, up to Expo's limit
+  of 600 notifications per second.
+
+- **Check receipts**  
+  Pass a collection of receipt IDs to `getReceipts()` to retrieve `PushReceipt` objects and
+  detect delivery failures after the fact. Expo recommends doing this 15 minutes to 24 hours
+  after sending.
+
+- **Typed results**  
+  Both methods return a structured result containing a collection of tickets or receipts
+  (distinguishing success from failure at the item level) and a separate collection of any
+  request-level errors.
+
+- **Additional security**  
+  Supports Expo's [additional security](https://docs.expo.dev/push-notifications/sending-notifications/#additional-security)
+  via an access token passed to the constructor.
 
 ## ⚙ Installation
 
@@ -185,6 +214,10 @@ Thank you for considering contributing! Please open a
 [pull request](https://github.com/Dru1X/expo-server-sdk-php/pulls), ensuring that test coverage is maintained or 
 increased with any proposed changes. All pull requests will be reviewed as soon as is reasonably possible.
 
-## 📄 License
+## 📋 Changelog
+
+See [CHANGELOG](CHANGELOG.md) for more information on what has been changed recently.
+
+## 📜 Licence
 
 Expo Push Server SDK (PHP) is open-sourced software licensed under the [MIT licence](LICENSE.md).
