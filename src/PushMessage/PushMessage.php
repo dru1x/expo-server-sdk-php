@@ -33,7 +33,9 @@ final readonly class PushMessage implements JsonSerializable
         public ?string                       $tag = null,
         public ?bool                         $mutableContent = null,
         public ?bool                         $_contentAvailable = null,
-    ) {}
+    )
+    {
+    }
 
     // Helpers ----
 
@@ -69,6 +71,28 @@ final readonly class PushMessage implements JsonSerializable
         );
     }
 
+    /**
+     * Get the number of tokens to which this PushMessage will be sent.
+     *
+     * @return int
+     */
+    public function tokenCount(): int
+    {
+        return $this->allTokens()->count();
+    }
+
+    /**
+     * Get all the push tokens to which this PushMessage will be sent.
+     *
+     * This will always return a PushTokenCollection, even if only a single PushToken has been supplied.
+     */
+    public function allTokens(): PushTokenCollection
+    {
+        return $this->to instanceof PushTokenCollection ?
+            PushTokenCollection::fromIterable($this->to) :
+            PushTokenCollection::make($this->to);
+    }
+
     // Internals ----
 
     /** @inheritDoc */
@@ -76,14 +100,14 @@ final readonly class PushMessage implements JsonSerializable
     {
         $allFields = get_object_vars($this);
 
-        $allFields['data'] = isset($allFields['data'])? (object) $allFields['data'] : null;
+        $allFields['data'] = isset($allFields['data']) ? (object)$allFields['data'] : null;
 
         return array_filter($allFields, fn(mixed $value) => !is_null($value));
     }
 
     public static function fromArray(array $data): self
     {
-        if(!isset($data['to']) || !is_array($data['to']) && !is_string($data['to'])) {
+        if (!isset($data['to']) || !is_array($data['to']) && !is_string($data['to'])) {
             throw new InvalidArgumentException('A push message requires at least one recipient token');
         }
 
@@ -91,15 +115,15 @@ final readonly class PushMessage implements JsonSerializable
             ? PushTokenCollection::fromArray($data['to'])
             : PushToken::fromString($data['to']);
 
-        if(isset($data['priority'])) {
+        if (isset($data['priority'])) {
             $data['priority'] = Priority::from($data['priority']);
         }
 
-        if(isset($data['interruptionLevel'])) {
+        if (isset($data['interruptionLevel'])) {
             $data['interruptionLevel'] = InterruptionLevel::from($data['interruptionLevel']);
         }
 
-        if(isset($data['richContent'])) {
+        if (isset($data['richContent'])) {
             $data['richContent'] = RichContent::fromArray($data['richContent']);
         }
 
