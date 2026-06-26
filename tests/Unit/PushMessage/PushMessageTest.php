@@ -191,6 +191,76 @@ JSON;
     }
 
     #[Test]
+    public function instantiates_with_tag(): void
+    {
+        $message = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            tag: 'live-score',
+        );
+
+        $this->assertSame('live-score', $message->tag);
+    }
+
+    #[Test]
+    public function tag_is_included_in_json_serialization(): void
+    {
+        $message = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            body: 'Test',
+            tag: 'live-score',
+        );
+
+        $expectedJson = <<<JSON
+{
+    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+    "body": "Test",
+    "tag": "live-score"
+}
+JSON;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($message));
+    }
+
+    #[Test]
+    public function tag_is_omitted_from_json_when_null(): void
+    {
+        $message = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            body: 'Test',
+        );
+
+        $decoded = json_decode(json_encode($message), true);
+
+        $this->assertArrayNotHasKey('tag', $decoded);
+    }
+
+    #[Test]
+    public function from_array_with_tag_returns_instance(): void
+    {
+        $message = PushMessage::fromArray([
+            'to' => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            'body' => 'Test',
+            'tag' => 'live-score',
+        ]);
+
+        $this->assertSame('live-score', $message->tag);
+    }
+
+    #[Test]
+    public function copy_preserves_tag(): void
+    {
+        $original = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            body: 'Test',
+            tag: 'live-score',
+        );
+
+        $copy = $original->copy(new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'));
+
+        $this->assertSame('live-score', $copy->tag);
+    }
+
+    #[Test]
     public function from_json_with_null_throws_error(): void
     {
         $this->expectException(TypeError::class);

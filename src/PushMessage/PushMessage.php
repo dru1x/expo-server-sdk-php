@@ -29,6 +29,7 @@ final readonly class PushMessage implements JsonSerializable
         public ?string                       $icon = null,
         public ?RichContent                  $richContent = null,
         public ?string                       $categoryId = null,
+        public ?string                       $tag = null,
         public ?bool                         $mutableContent = null,
         public ?bool                         $_contentAvailable = null,
     ) {}
@@ -60,6 +61,7 @@ final readonly class PushMessage implements JsonSerializable
             icon: $this->icon,
             richContent: $this->richContent,
             categoryId: $this->categoryId,
+            tag: $this->tag,
             mutableContent: $this->mutableContent,
             _contentAvailable: $this->_contentAvailable,
         );
