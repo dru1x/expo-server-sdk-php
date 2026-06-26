@@ -144,6 +144,108 @@ class PushMessageCollectionTest extends TestCase
     }
 
     #[Test]
+    public function chunk_by_notifications_returns_single_empty_chunk_for_empty_collection(): void
+    {
+        $collection = new PushMessageCollection();
+
+        $chunks = $collection->chunkByNotifications(3);
+
+        $this->assertCount(1, $chunks);
+        $this->assertCount(0, $chunks[0]);
+    }
+
+    #[Test]
+    public function chunk_by_notifications_does_not_split_multi_token_message_that_fits_in_chunk(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushTokenCollection(
+                new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+                new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+            ), title: 'Test Notification'),
+        );
+
+        $chunks = $collection->chunkByNotifications(3);
+
+        $this->assertCount(1, $chunks);
+        $this->assertCount(1, $chunks[0]);
+        $this->assertCount(3, $chunks[0]->get(0)->to);
+    }
+
+    #[Test]
+    public function chunk_by_notifications_splits_standalone_multi_token_message_across_chunks(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushTokenCollection(
+                new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+                new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+                new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+                new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
+            ), title: 'Test Notification'),
+        );
+
+        $chunks = $collection->chunkByNotifications(2);
+
+        $this->assertCount(3, $chunks);
+
+        $this->assertCount(1, $chunks[0]);
+        $this->assertCount(2, $chunks[0]->get(0)->to);
+
+        $this->assertCount(1, $chunks[1]);
+        $this->assertCount(2, $chunks[1]->get(0)->to);
+
+        $this->assertCount(1, $chunks[2]);
+        $this->assertCount(1, $chunks[2]->get(0)->to);
+    }
+
+    #[Test]
+    public function chunk_by_notifications_preserves_token_order_when_splitting(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushTokenCollection(
+                new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+                new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+                new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
+            ), title: 'Test Notification'),
+        );
+
+        $chunks = $collection->chunkByNotifications(2);
+
+        $this->assertCount(2, $chunks);
+
+        $firstChunkTokens = $chunks[0]->get(0)->to;
+        $this->assertEquals('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $firstChunkTokens->get(0)->toString());
+        $this->assertEquals('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]', $firstChunkTokens->get(1)->toString());
+
+        $secondChunkTokens = $chunks[1]->get(0)->to;
+        $this->assertEquals('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]', $secondChunkTokens->get(0)->toString());
+        $this->assertEquals('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]', $secondChunkTokens->get(1)->toString());
+    }
+
+    #[Test]
+    public function chunk_by_notifications_with_size_one_puts_each_token_in_its_own_chunk(): void
+    {
+        $collection = new PushMessageCollection(
+            new PushMessage(to: new PushTokenCollection(
+                new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+                new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
+            ), title: 'Test Notification'),
+        );
+
+        $chunks = $collection->chunkByNotifications(1);
+
+        $this->assertCount(3, $chunks);
+
+        foreach ($chunks as $chunk) {
+            $this->assertCount(1, $chunk);
+            $this->assertCount(1, $chunk->get(0)->to);
+        }
+    }
+
+    #[Test]
     public function chunk_by_notifications_throws_exception_if_size_is_less_than_one(): void
     {
         $collection = new PushMessageCollection(
