@@ -113,6 +113,7 @@ class PushMessageTest extends TestCase
             icon: 'test-icon',
             richContent: $richContent,
             categoryId: 'test-category',
+            collapseId: 'test-collapse-key',
             tag: 'test-tag',
             mutableContent: true,
             _contentAvailable: false,
@@ -133,6 +134,7 @@ class PushMessageTest extends TestCase
         $this->assertEquals('test-icon', $message->icon);
         $this->assertEquals($richContent, $message->richContent);
         $this->assertEquals('test-category', $message->categoryId);
+        $this->assertEquals('test-collapse-key', $message->collapseId);
         $this->assertEquals('test-tag', $message->tag);
         $this->assertTrue($message->mutableContent);
         $this->assertFalse($message->_contentAvailable);
@@ -170,7 +172,7 @@ JSON;
             title: 'Test Notification',
             body: 'This is a test notification',
             data: ['list', 'of', 'values'],
-            tag: 'test-tag',
+            collapseId: 'test-collapse-key',
         );
 
         $expectedJson = <<<JSON
@@ -179,7 +181,7 @@ JSON;
     "title": "Test Notification", 
     "body": "This is a test notification",
     "data": {"0":  "list", "1": "of", "2": "values"},
-    "tag": "test-tag"
+    "collapseId": "test-collapse-key"
 }
 JSON;
 
@@ -196,6 +198,7 @@ JSON;
             'richContent' => [
                 'image' => 'https://example.com',
             ],
+            'collapseId' => 'test-collapse-key',
             'tag' => 'test-tag',
         ];
 
@@ -203,6 +206,7 @@ JSON;
 
         $this->assertSame('This is a test notification', $message->body);
         $this->assertSame('https://example.com', $message->richContent->image);
+        $this->assertSame('test-collapse-key', $message->collapseId);
         $this->assertSame('test-tag', $message->tag);
     }
 
@@ -254,6 +258,7 @@ JSON;
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
             title: 'Test Notification',
             body: 'This is a test notification',
+            collapseId: 'test-collapse-key',
             tag: 'test-tag',
         );
 
@@ -261,6 +266,7 @@ JSON;
 
         $this->assertSame('Test Notification', $copy->title);
         $this->assertSame('This is a test notification', $copy->body);
+        $this->assertSame('test-collapse-key', $copy->collapseId);
         $this->assertSame('test-tag', $copy->tag);
     }
 
@@ -271,6 +277,7 @@ JSON;
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
             title: 'Test Notification',
             body: 'This is a test notification',
+            collapseId: 'test-collapse-key',
             tag: 'test-tag',
         );
 
@@ -281,6 +288,7 @@ JSON;
         $this->assertSame($newToken, $copy->to);
         $this->assertSame('Test Notification', $copy->title);
         $this->assertSame('This is a test notification', $copy->body);
+        $this->assertSame('test-collapse-key', $copy->collapseId);
         $this->assertSame('test-tag', $copy->tag);
     }
 
