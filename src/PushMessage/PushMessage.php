@@ -46,7 +46,7 @@ final readonly class PushMessage implements JsonSerializable
     public function copy(PushTokenCollection|PushToken|null $to = null): self
     {
         return new PushMessage(
-            to: $to ?? $this->to,
+            to: $to ?? clone $this->to,
             title: $this->title,
             subtitle: $this->subtitle,
             body: $this->body,
@@ -59,7 +59,7 @@ final readonly class PushMessage implements JsonSerializable
             interruptionLevel: $this->interruptionLevel,
             channelId: $this->channelId,
             icon: $this->icon,
-            richContent: $this->richContent,
+            richContent: $this->richContent? clone $this->richContent : null,
             categoryId: $this->categoryId,
             tag: $this->tag,
             mutableContent: $this->mutableContent,
