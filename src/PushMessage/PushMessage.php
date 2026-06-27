@@ -43,7 +43,7 @@ final readonly class PushMessage implements JsonSerializable
      *
      * @return self
      */
-    public function copy(PushTokenCollection|PushToken|null $to): self
+    public function copy(PushTokenCollection|PushToken|null $to = null): self
     {
         return new PushMessage(
             to: $to ?? $this->to,
