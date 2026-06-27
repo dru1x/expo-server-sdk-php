@@ -175,6 +175,17 @@ class ExpoPushTest extends TestCase
     }
 
     #[Test]
+    public function send_notifications_does_not_send_requests_for_empty_collection(): void
+    {
+        $result = $this->service->sendNotifications(new PushMessageCollection());
+
+        $this->mockClient->assertSentCount(0, SendNotificationsRequest::class);
+
+        $this->assertCount(0, $result->tickets);
+        $this->assertFalse($result->hasErrors());
+    }
+
+    #[Test]
     public function send_notification_handles_single_push_message(): void
     {
         $message = $this->generatePushMessage();
@@ -416,6 +427,17 @@ class ExpoPushTest extends TestCase
             $this->assertEquals(PushStatus::Ok, $receipt->status);
             $this->assertTrue(in_array($receipt->id, $receiptIds));
         }
+    }
+
+    #[Test]
+    public function get_receipts_does_not_send_requests_for_empty_collection(): void
+    {
+        $result = $this->service->getReceipts(new PushReceiptIdCollection());
+
+        $this->mockClient->assertSentCount(0, GetReceiptsRequest::class);
+
+        $this->assertCount(0, $result->receipts);
+        $this->assertFalse($result->hasErrors());
     }
 
     #[Test]

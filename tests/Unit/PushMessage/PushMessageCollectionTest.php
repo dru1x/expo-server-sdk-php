@@ -144,14 +144,13 @@ class PushMessageCollectionTest extends TestCase
     }
 
     #[Test]
-    public function chunk_by_notifications_returns_single_empty_chunk_for_empty_collection(): void
+    public function chunk_by_notifications_returns_empty_array_for_empty_collection(): void
     {
         $collection = new PushMessageCollection();
 
         $chunks = $collection->chunkByNotifications(3);
 
-        $this->assertCount(1, $chunks);
-        $this->assertCount(0, $chunks[0]);
+        $this->assertEmpty($chunks);
     }
 
     #[Test]
