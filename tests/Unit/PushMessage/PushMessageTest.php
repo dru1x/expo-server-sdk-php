@@ -2,7 +2,10 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushMessage;
 
+use Dru1x\ExpoPush\PushMessage\InterruptionLevel;
+use Dru1x\ExpoPush\PushMessage\Priority;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
+use Dru1x\ExpoPush\PushMessage\RichContent;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
 use PHPUnit\Framework\Attributes\Test;
@@ -88,13 +91,62 @@ class PushMessageTest extends TestCase
     }
 
     #[Test]
-    public function json_encode_returns_value(): void
+    public function instantiates_with_all_properties(): void
+    {
+        $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+        $expiryTime = time() + 90;
+        $richContent = RichContent::fromArray(['image' => 'https://example.com']);
+
+        $message = new PushMessage(
+            to: $token,
+            title: 'Test Notification',
+            subtitle: 'This is a test notification',
+            body: 'This is a test notification',
+            ttl: 30,
+            data: ['list', 'of', 'values'],
+            expiration: $expiryTime,
+            priority: Priority::Normal,
+            sound: 'default',
+            badge: 1,
+            interruptionLevel: InterruptionLevel::Active,
+            channelId: 'test-channel',
+            icon: 'test-icon',
+            richContent: $richContent,
+            categoryId: 'test-category',
+            tag: 'test-tag',
+            mutableContent: true,
+            _contentAvailable: false,
+        );
+
+        $this->assertSame($token, $message->to);
+        $this->assertEquals('Test Notification', $message->title);
+        $this->assertEquals('This is a test notification', $message->subtitle);
+        $this->assertEquals('This is a test notification', $message->body);
+        $this->assertEquals(30, $message->ttl);
+        $this->assertEquals(['list', 'of', 'values'], $message->data);
+        $this->assertEquals($expiryTime, $message->expiration);
+        $this->assertEquals(Priority::Normal, $message->priority);
+        $this->assertEquals('default', $message->sound);
+        $this->assertEquals(1, $message->badge);
+        $this->assertEquals(InterruptionLevel::Active, $message->interruptionLevel);
+        $this->assertEquals('test-channel', $message->channelId);
+        $this->assertEquals('test-icon', $message->icon);
+        $this->assertEquals($richContent, $message->richContent);
+        $this->assertEquals('test-category', $message->categoryId);
+        $this->assertEquals('test-tag', $message->tag);
+        $this->assertTrue($message->mutableContent);
+        $this->assertFalse($message->_contentAvailable);
+    }
+
+    #[Test]
+    public function json_encode_returns_correct_json(): void
     {
         $message = new PushMessage(
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
             title: 'Test Notification',
             body: 'This is a test notification',
             data: ['key' => 'value', 'foo' => 'bar'],
+            tag: 'test-tag',
         );
 
         $expectedJson = <<<JSON
@@ -102,7 +154,8 @@ class PushMessageTest extends TestCase
     "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
     "title": "Test Notification", 
     "body": "This is a test notification",
-    "data": {"key": "value", "foo": "bar"}
+    "data": {"key": "value", "foo": "bar"},
+    "tag": "test-tag"
 }
 JSON;
 
@@ -110,13 +163,14 @@ JSON;
     }
 
     #[Test]
-    public function to_json_returns_value(): void
+    public function to_json_returns_correct_json(): void
     {
         $message = new PushMessage(
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
             title: 'Test Notification',
             body: 'This is a test notification',
             data: ['list', 'of', 'values'],
+            tag: 'test-tag',
         );
 
         $expectedJson = <<<JSON
@@ -124,7 +178,8 @@ JSON;
     "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
     "title": "Test Notification", 
     "body": "This is a test notification",
-    "data": {"0":  "list", "1": "of", "2": "values"}
+    "data": {"0":  "list", "1": "of", "2": "values"},
+    "tag": "test-tag"
 }
 JSON;
 
@@ -141,12 +196,14 @@ JSON;
             'richContent' => [
                 'image' => 'https://example.com',
             ],
+            'tag' => 'test-tag',
         ];
 
         $message = PushMessage::fromArray($array);
 
         $this->assertSame('This is a test notification', $message->body);
         $this->assertSame('https://example.com', $message->richContent->image);
+        $this->assertSame('test-tag', $message->tag);
     }
 
     #[Test]
@@ -188,6 +245,60 @@ JSON;
 
         $this->assertInstanceOf(PushMessage::class, $message);
         $this->assertInstanceOf(PushTokenCollection::class, $message->to);
+    }
+
+    #[Test]
+    public function copy_preserves_properties(): void
+    {
+        $original = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            title: 'Test Notification',
+            body: 'This is a test notification',
+            tag: 'test-tag',
+        );
+
+        $copy = $original->copy();
+
+        $this->assertSame('Test Notification', $copy->title);
+        $this->assertSame('This is a test notification', $copy->body);
+        $this->assertSame('test-tag', $copy->tag);
+    }
+
+    #[Test]
+    public function copy_replaces_recipient(): void
+    {
+        $original = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            title: 'Test Notification',
+            body: 'This is a test notification',
+            tag: 'test-tag',
+        );
+
+        $newToken = new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]');
+
+        $copy = $original->copy(to: $newToken);
+
+        $this->assertSame($newToken, $copy->to);
+        $this->assertSame('Test Notification', $copy->title);
+        $this->assertSame('This is a test notification', $copy->body);
+        $this->assertSame('test-tag', $copy->tag);
+    }
+
+    #[Test]
+    public function copy_clones_nested_objects(): void
+    {
+        $original = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            richContent: RichContent::fromArray(['image' => 'https://example.com']),
+        );
+
+        $copy = $original->copy();
+
+        $this->assertNotSame($original->to, $copy->to);
+        $this->assertEquals($original->to, $copy->to);
+
+        $this->assertNotSame($original->richContent, $copy->richContent);
+        $this->assertEquals($original->richContent, $copy->richContent);
     }
 
     #[Test]
