@@ -9,7 +9,9 @@ use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
 use Dru1x\ExpoPush\PushReceipt\PushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
+use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
 use Dru1x\ExpoPush\PushTicket\PushTicket;
+use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Request\GetReceiptsRequest;
@@ -198,6 +200,43 @@ class ExpoPushTest extends TestCase
         $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
 
         $this->assertCount(1, $result->tickets);
+    }
+
+    #[Test]
+    public function send_notifications_handles_mixed_successful_and_failed_tickets(): void
+    {
+        $responseBody = [
+            'data' => [
+                ['status' => 'ok',    'id' => 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'],
+                ['status' => 'error', 'message' => 'The device cannot be reached', 'details' => ['error' => 'DeviceNotRegistered', 'expoPushToken' => 'ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]']],
+                ['status' => 'ok',    'id' => 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'],
+            ],
+        ];
+
+        $this->mockClient->addResponse(
+            MockResponse::make(body: $responseBody, headers: ['Content-Type' => 'application/json'])
+        );
+
+        $messages = new PushMessageCollection(
+            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]')),
+            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]')),
+            new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]')),
+        );
+
+        $result = $this->service->sendNotifications($messages);
+
+        $this->assertCount(3, $result->tickets);
+        $this->assertFalse($result->hasErrors());
+        $this->assertTrue($result->hasSuccessfulTickets());
+        $this->assertTrue($result->hasFailedTickets());
+
+        $this->assertInstanceOf(SuccessfulPushTicket::class, $result->tickets->get(0));
+        $this->assertInstanceOf(FailedPushTicket::class,     $result->tickets->get(1));
+        $this->assertInstanceOf(SuccessfulPushTicket::class, $result->tickets->get(2));
+
+        /** @var FailedPushTicket $failedTicket */
+        $failedTicket = $result->tickets->get(1);
+        $this->assertEquals(PushTicketErrorCode::DeviceNotRegistered, $failedTicket->details->error);
     }
 
     #[Test]
