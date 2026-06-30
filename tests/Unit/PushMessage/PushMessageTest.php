@@ -285,6 +285,23 @@ JSON;
     }
 
     #[Test]
+    public function copy_clones_nested_objects(): void
+    {
+        $original = new PushMessage(
+            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            richContent: RichContent::fromArray(['image' => 'https://example.com']),
+        );
+
+        $copy = $original->copy();
+
+        $this->assertNotSame($original->to, $copy->to);
+        $this->assertEquals($original->to, $copy->to);
+
+        $this->assertNotSame($original->richContent, $copy->richContent);
+        $this->assertEquals($original->richContent, $copy->richContent);
+    }
+
+    #[Test]
     public function from_json_with_null_throws_error(): void
     {
         $this->expectException(TypeError::class);
