@@ -52,11 +52,17 @@ final class ExpoPushConnector extends Connector
      */
     public function sdkVersion(): string
     {
-        $composer = json_decode(
-            file_get_contents(dirname(__DIR__) . '/composer.json')
-        );
+        static $version = null;
 
-        return InstalledVersions::getPrettyVersion($composer->name);
+        if (!$version) {
+            $composer = json_decode(
+                file_get_contents(dirname(__DIR__) . '/composer.json')
+            );
+
+            $version = InstalledVersions::getPrettyVersion($composer->name);
+        }
+
+        return (string)$version;
     }
 
     // Internals ----
