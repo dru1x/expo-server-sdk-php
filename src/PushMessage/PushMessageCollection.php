@@ -57,7 +57,7 @@ final class PushMessageCollection implements Collection
         foreach ($this->items as $pushMessage) {
 
             // Calculate how much notification space is left in the current chunk
-            $currentChunkCapacity = $this->calculateChunkCapacity($size, $currentChunk, $allChunks);
+            $currentChunkCapacity = $this->ensureChunkHasCapacity($size, $currentChunk, $allChunks);
 
             // Get the number of notifications the current message will send
             $notificationCount = $pushMessage->tokenCount();
@@ -75,7 +75,7 @@ final class PushMessageCollection implements Collection
             while($recipientTokens->isNotEmpty()) {
 
                 // Calculate how much notification space is left in the current chunk
-                $currentChunkCapacity = $this->calculateChunkCapacity($size, $currentChunk, $allChunks);
+                $currentChunkCapacity = $this->ensureChunkHasCapacity($size, $currentChunk, $allChunks);
 
                 // Take as many tokens as will fit in the chunk, add them to a message copy, and add it to the chunk
                 $currentChunk->add(
@@ -106,24 +106,26 @@ final class PushMessageCollection implements Collection
     // Internals ----
 
     /**
-     * Calculate the amount of space remaining in a chunk of PushMessages.
+     * Calculates the amount of space remaining in a chunk of PushMessages.
      *
      * This uses notification counts rather than message counts, and makes a new chunk
-     * when the current one is full.
+     * when the given one is full.
+     *
+     * @return int The number of notifications that can still fit in the current chunk
      */
-    protected function calculateChunkCapacity(int $size, self &$currentChunk, array &$allChunks): int
+    protected function ensureChunkHasCapacity(int $size, self &$chunk, array &$allChunks): int
     {
-        // Calculate how much notification space is left in the current chunk
-        $currentChunkCapacity = $size - $currentChunk->notificationCount();
+        // Calculate how much notification space is left in the chunk
+        $chunkCapacity = $size - $chunk->notificationCount();
 
         // If the chunk is already full, start a new one
-        if ($currentChunkCapacity <= 0) {
-            $currentChunk = new self();
-            $allChunks[] = $currentChunk;
-            $currentChunkCapacity = $size;
+        if ($chunkCapacity <= 0) {
+            $chunk = new self();
+            $allChunks[] = $chunk;
+            $chunkCapacity = $size;
         }
 
-        // Return the remaining number of notifications allowed in the current chunk
-        return $currentChunkCapacity;
+        // Return the remaining number of notifications allowed in the chunk
+        return $chunkCapacity;
     }
 }
