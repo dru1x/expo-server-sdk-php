@@ -39,13 +39,8 @@ final class PushTokenCollection implements Collection
             return new self();
         }
 
-        $shiftCount = min($count, $this->count());
-        $shiftedItems = [];
-
-        for ($i = 0; $i < $shiftCount; $i++) {
-            $shiftedItems[] = array_shift($this->items);
-        }
-
-        return new self(...$shiftedItems);
+        return new self(
+            ...array_splice($this->items, 0, min($count, $this->count()))
+        );
     }
 }
