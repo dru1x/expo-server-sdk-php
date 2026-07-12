@@ -5,11 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2026-06-22
+## [1.0.0] - 2026-07-12
+
+### Added
+
+- Added support for the `collapseId` field (iOS + Android) (#60)
+- Added support for the `tag` field (Android) (#61)
 
 ### Changed
 
 - Added art, summary and changelog section to README
+- Cached SDK version in memory to avoid repeated disk reads (#62)
+
+### Fixed
+
+- Fixed `chunkByNotifications` behaviour in `PushMessageCollection` so multi-recipient messages are split correctly across chunk boundaries (#59)
+- Prevented `sendNotifications()` and `getReceipts()` from firing spurious HTTP requests when given an empty collection (#63)
 
 ## [0.8.2] - 2026-04-04
 
