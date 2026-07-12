@@ -1,6 +1,6 @@
 <?php
 
-namespace Dru1x\ExpoPush\Tests\Unit\PushTicket;
+namespace Dru1x\ExpoPush\Tests\Unit\PushReceipt;
 
 use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\Support\PushStatus;
