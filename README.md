@@ -153,6 +153,19 @@ representing a ticket that was returned with a status of "error".
 If errors were encountered, they will be present in the `PushErrorCollection`, and the `PushTicketCollection` will have 
 a gap in its keys that corresponds to the failed chunk of notifications. Inspect the errors to find out what went wrong.
 
+If only a single notification needs to be sent, the `sendNotification()` method can be used instead. This accepts a 
+single `PushMessage` and, like `sendNotifications()`, returns a `SendNotificationsResult`:
+
+```php
+$result = $expoPush->sendNotification(
+    new PushMessage(
+        to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+        title: 'Hello',
+        body: 'This is a push notification'
+    )
+);
+```
+
 ### Checking Tickets
 
 Once notifications have been sent, Expo recommends that 
@@ -196,6 +209,14 @@ the collection, the `getById()` method can be used. Each `PushReceipt` with eith
 
 If errors were encountered, they will be present in the `PushErrorCollection`, and the `PushReceiptCollection` will have
 a gap in its keys that corresponds to the failed chunk of notifications. Inspect the errors to find out what went wrong.
+
+### Checking the SDK Version
+
+The installed version of this SDK, as reported by composer, can be retrieved via the `sdkVersion()` method:
+
+```php
+$version = $expoPush->sdkVersion();
+```
 
 ### Further Information
 
