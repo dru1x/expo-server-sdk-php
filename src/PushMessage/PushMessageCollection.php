@@ -51,6 +51,10 @@ final class PushMessageCollection implements Collection
             throw new ValueError('Size must be greater than 0');
         }
 
+        if ($this->isEmpty()) {
+            return [];
+        }
+
         $currentChunk = new self();
         $allChunks    = [$currentChunk];
 
