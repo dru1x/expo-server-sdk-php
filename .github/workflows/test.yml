@@ -23,7 +23,7 @@ jobs:
         uses: php-actions/phpunit@v4
         with:
           php_version: ${{matrix.php-version}}
-          php_extensions: json zip xdebug
+          php_extensions: json zlib xdebug
           configuration: phpunit.xml.dist
           coverage_text: true
           coverage_clover: coverage.xml
