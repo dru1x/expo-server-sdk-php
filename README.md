@@ -214,6 +214,11 @@ Thank you for considering contributing! Please open a
 [pull request](https://github.com/Dru1X/expo-server-sdk-php/pulls), ensuring that test coverage is maintained or 
 increased with any proposed changes. All pull requests will be reviewed as soon as is reasonably possible.
 
+## 🔒 Security
+
+If you discover a security vulnerability, please review our [security policy](SECURITY.md) for details on how to
+report it.
+
 ## 📋 Changelog
 
 See [CHANGELOG](CHANGELOG.md) for more information on what has been changed recently.
