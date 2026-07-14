@@ -32,7 +32,7 @@ trait CompressesBody
 
         if (strlen($bodyString) > self::COMPRESSION_THRESHOLD) {
             $pendingRequest->headers()->add('Content-Encoding', 'gzip');
-            $bodyString = gzcompress($bodyString);
+            $bodyString = gzencode($bodyString);
         }
 
         $pendingRequest->setBody(new StringBodyRepository($bodyString));

@@ -57,7 +57,7 @@ class SendNotificationsRequestTest extends TestCase
         $lastPendingRequest = $this->mockClient->getLastPendingRequest();
 
         $this->assertEquals('gzip', $lastPendingRequest->headers()->get('Content-Encoding'));
-        $this->assertEquals(gzcompress((string)$request->body()), $lastPendingRequest->body()->all());
+        $this->assertEquals(gzencode((string)$request->body()), $lastPendingRequest->body()->all());
     }
 
     #[Test]
