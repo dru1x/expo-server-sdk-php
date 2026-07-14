@@ -15,7 +15,7 @@ final readonly class PushToken implements JsonSerializable, Stringable
 
     public function __construct(public string $value)
     {
-        if (!preg_match('/^ExponentPushToken\[([a-zA-Z0-9\-_]+)]$/', $this->value)) {
+        if (!preg_match('/^(Exponent|Expo)PushToken\[([a-zA-Z0-9_-]+)]$/', $this->value)) {
             throw new InvalidArgumentException("'$value' is not a valid push token");
         }
     }

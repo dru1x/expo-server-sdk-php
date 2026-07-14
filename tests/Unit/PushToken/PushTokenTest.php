@@ -12,11 +12,43 @@ use TypeError;
 class PushTokenTest extends TestCase
 {
     #[Test]
+    public function valid_exponent_prefix_format_value_is_accepted(): void
+    {
+        $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+
+        $this->assertSame('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
+    }
+
+    #[Test]
+    public function valid_expo_prefix_format_value_is_accepted(): void
+    {
+        $token = new PushToken('ExpoPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+
+        $this->assertSame('ExpoPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
+    }
+
+    #[Test]
     public function invalid_value_throws_exception(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new PushToken('NOT A TOKEN');
+    }
+
+    #[Test]
+    public function invalid_legacy_uuid_value_throws_exception(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new PushToken('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+    }
+
+    #[Test]
+    public function invalid_non_alpha_numerical_throws_exception(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new PushToken('ExpoPushToken[xxxxxxxxxxxxxxxxxxxxx!]');
     }
 
     #[Test]
