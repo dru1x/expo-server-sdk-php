@@ -7,6 +7,7 @@ namespace Dru1x\ExpoPush\Tests\Unit\Request;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
 use Dru1x\ExpoPush\Request\RequestExceptionHandler;
+use JsonException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Saloon\Exceptions\Request\FatalRequestException;
@@ -71,5 +72,51 @@ class RequestExceptionHandlerTest extends TestCase
         $this->assertEquals('You are trying to send more than 100 push notifications in one request', $error->message);
         $this->assertEquals(300, $error->startIndex);
         $this->assertEquals(399, $error->endIndex);
+    }
+
+    #[Test]
+    public function invoke_with_request_exception_and_non_json_response_adds_generic_push_error(): void
+    {
+        $exceptionResponse = $this->createMock(Response::class);
+        $exceptionResponse
+            ->method('json')
+            ->with('errors')
+            ->willThrowException(new JsonException('Syntax error'));
+
+        $requestException = new RequestException($exceptionResponse, 'There was an error with the request: 502');
+
+        $handler = $this->handler;
+        $handler($requestException, 2);
+
+        $this->assertCount(1, $this->errors);
+
+        $error = $this->errors->get(0);
+        $this->assertEquals(PushErrorCode::Failed, $error->code);
+        $this->assertEquals('There was an error with the request: 502', $error->message);
+        $this->assertEquals(200, $error->startIndex);
+        $this->assertEquals(299, $error->endIndex);
+    }
+
+    #[Test]
+    public function invoke_with_request_exception_and_missing_errors_key_adds_generic_push_error(): void
+    {
+        $exceptionResponse = $this->createMock(Response::class);
+        $exceptionResponse
+            ->method('json')
+            ->with('errors')
+            ->willReturn(null);
+
+        $requestException = new RequestException($exceptionResponse, 'There was an error with the request: 500');
+
+        $handler = $this->handler;
+        $handler($requestException, 4);
+
+        $this->assertCount(1, $this->errors);
+
+        $error = $this->errors->get(0);
+        $this->assertEquals(PushErrorCode::Failed, $error->code);
+        $this->assertEquals('There was an error with the request: 500', $error->message);
+        $this->assertEquals(400, $error->startIndex);
+        $this->assertEquals(499, $error->endIndex);
     }
 }
