@@ -14,9 +14,6 @@ final class RequestExceptionHandler
 {
     public function __construct(protected int $batchSize, protected PushErrorCollection $errors) {}
 
-    /**
-     * @throws JsonException
-     */
     public function __invoke(FatalRequestException|RequestException|RateLimitReachedException $exception, int $requestIndex): void
     {
         $startIndex = $requestIndex * $this->batchSize;
@@ -44,11 +41,28 @@ final class RequestExceptionHandler
             return;
         }
 
-        // The request itself was successful, but the response contained errors
+        // The request itself was successful, but the response may contain errors
         $response = $exception->getResponse();
 
-        foreach ($response->json('errors') as $responseError) {
+        try {
+            $responseErrors = $response->json('errors');
+        } catch (JsonException) {
+            $responseErrors = null;
+        }
 
+        // No errors were present in the response body
+        if (!is_array($responseErrors)) {
+            $this->errors->add(new PushError(
+                code: PushErrorCode::Failed,
+                message: $exception->getMessage(),
+                startIndex: $startIndex,
+                endIndex: $endIndex,
+            ));
+            return;
+        }
+
+        // Errors were found in the response body
+        foreach ($responseErrors as $responseError) {
             $responseErrorCode = $responseError['code'] ?? null;
 
             $this->errors->add(new PushError(
