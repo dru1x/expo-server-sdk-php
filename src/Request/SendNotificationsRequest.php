@@ -2,6 +2,7 @@
 
 namespace Dru1x\ExpoPush\Request;
 
+use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
 use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
 use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
@@ -118,6 +119,9 @@ final class SendNotificationsRequest extends Request implements HasBody
 
     // Internals ----
 
+    /**
+     * @return array<int, PushMessage>
+     */
     protected function defaultBody(): array
     {
         $this->preventTooManyMessages();

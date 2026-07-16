@@ -89,8 +89,8 @@ final class GetReceiptsRequest extends Request implements HasBody
     /**
      * Make a FailedPushReceipt from the given data
      *
-     * @param string                                 $id
-     * @param array{message: string, details: array} $data
+     * @param string $id
+     * @param array{message: string, details: array{error?: string, expoPushToken?: string} $data
      *
      * @return FailedPushReceipt
      */
@@ -111,6 +111,9 @@ final class GetReceiptsRequest extends Request implements HasBody
 
     // Internals ----
 
+    /**
+     * @return array{ids: array<int, string>}
+     */
     protected function defaultBody(): array
     {
         $this->preventTooManyReceipts();

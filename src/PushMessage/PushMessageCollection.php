@@ -10,6 +10,8 @@ use ValueError;
 
 /**
  * A collection of PushMessage objects
+ *
+ * @implements Collection<int, PushMessage>
  */
 final class PushMessageCollection implements Collection
 {
@@ -43,7 +45,7 @@ final class PushMessageCollection implements Collection
      *
      * @param int $size
      *
-     * @return array<array-key, PushMessageCollection>
+     * @return array<self>
      */
     public function chunkByNotifications(int $size): array
     {
@@ -114,6 +116,8 @@ final class PushMessageCollection implements Collection
      *
      * This uses notification counts rather than message counts, and makes a new chunk
      * when the given one is full.
+     *
+     * @param array<self> $allChunks
      *
      * @return int The number of notifications that can still fit in the current chunk
      */

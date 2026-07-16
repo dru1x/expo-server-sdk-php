@@ -4,7 +4,7 @@ parameters:
         - src/
 
     # Level 10 is the highest level
-    level: 5
+    level: 6
 
     reportUnmatchedIgnoredErrors: false
     checkNullables: true

@@ -7,6 +7,8 @@ use Dru1x\ExpoPush\Support\CollectionMethods;
 
 /**
  * A collection of PushTicket objects
+ *
+ * @implements Collection<int, PushTicket>
  */
 final class PushTicketCollection implements Collection
 {

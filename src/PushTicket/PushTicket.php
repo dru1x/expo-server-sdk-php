@@ -30,7 +30,11 @@ abstract readonly class PushTicket implements JsonSerializable
 
     // Internals ----
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     *
+     * @return array<mixed>
+     */
     public function jsonSerialize(): array
     {
         return array_filter(

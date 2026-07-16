@@ -13,6 +13,9 @@ final readonly class PushMessage implements JsonSerializable
 {
     use ConvertsFromJson, ConvertsToJson;
 
+    /**
+     * @param array<mixed>|object|null $data
+     */
     public function __construct(
         public PushTokenCollection|PushToken $to,
         public ?string                       $title = null,
@@ -95,7 +98,11 @@ final readonly class PushMessage implements JsonSerializable
 
     // Internals ----
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     *
+     * @return array<mixed>
+     */
     public function jsonSerialize(): array
     {
         $allFields = get_object_vars($this);
@@ -105,6 +112,9 @@ final readonly class PushMessage implements JsonSerializable
         return array_filter($allFields, fn(mixed $value) => !is_null($value));
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     public static function fromArray(array $data): self
     {
         if (!isset($data['to']) || !is_array($data['to']) && !is_string($data['to'])) {

@@ -29,7 +29,11 @@ abstract readonly class PushReceipt implements JsonSerializable
 
     // Internals ----
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     *
+     * @return array<mixed>
+     */
     public function jsonSerialize(): array
     {
         return array_filter(

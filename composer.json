@@ -32,10 +32,14 @@
   "require-dev": {
     "phpstan/phpstan": "^v2.2",
     "phpstan/extension-installer": "^1.4",
-    "phpstan/phpstan-phpunit": "^1.4 || ^2.0",
-    "phpunit/phpunit": "^11.5.5"
+    "phpstan/phpstan-phpunit": "^2.0",
+    "phpunit/phpunit": "^11.5"
   },
   "scripts": {
+    "analyse": "@php vendor/bin/phpstan analyse --verbose --ansi",
+    "lint": [
+      "@analyse"
+    ],
     "test": "vendor/bin/phpunit --testdox",
     "test-coverage": "@test --coverage-html coverage"
   },
