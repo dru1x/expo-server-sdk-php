@@ -12,6 +12,46 @@ use TypeError;
 class PushTokenTest extends TestCase
 {
     #[Test]
+    public function valid_exponent_prefix_format_value_is_accepted(): void
+    {
+        $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+
+        $this->assertSame('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
+    }
+
+    #[Test]
+    public function valid_expo_prefix_format_value_is_accepted(): void
+    {
+        $token = new PushToken('ExpoPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+
+        $this->assertSame('ExpoPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $token->value);
+    }
+
+    #[Test]
+    public function valid_legacy_uuid_value_is_accepted(): void
+    {
+        $token = new PushToken('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+
+        $this->assertSame('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', $token->value);
+    }
+
+    #[Test]
+    public function valid_non_alpha_numerical_body_is_accepted(): void
+    {
+        $token = new PushToken('ExpoPushToken[xxxxxxxxxxxxxxxxxxxxx!]');
+
+        $this->assertSame('ExpoPushToken[xxxxxxxxxxxxxxxxxxxxx!]', $token->value);
+    }
+
+    #[Test]
+    public function valid_empty_body_is_accepted(): void
+    {
+        $token = new PushToken('ExpoPushToken[]');
+
+        $this->assertSame('ExpoPushToken[]', $token->value);
+    }
+
+    #[Test]
     public function invalid_value_throws_exception(): void
     {
         $this->expectException(InvalidArgumentException::class);
