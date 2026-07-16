@@ -15,7 +15,7 @@ final readonly class PushToken implements JsonSerializable, Stringable
 
     public function __construct(public string $value)
     {
-        if ($this->isNotValidTokenValue($value)) {
+        if (! $this->isValidTokenValue($value)) {
             throw new InvalidArgumentException("'$value' is not a valid push token");
         }
     }
@@ -78,10 +78,5 @@ final readonly class PushToken implements JsonSerializable, Stringable
         }
 
         return false;
-    }
-
-    protected function isNotValidTokenValue(string $value): bool
-    {
-        return ! $this->isValidTokenValue($value);
     }
 }
