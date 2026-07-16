@@ -22,7 +22,9 @@ use UnexpectedValueException;
 
 final class GetReceiptsRequest extends Request implements HasBody
 {
-    use AcceptsJson, HasJsonBody, CompressesBody;
+    use AcceptsJson;
+    use HasJsonBody;
+    use CompressesBody;
 
     public const MAX_RECEIPT_COUNT = 1000;
 
@@ -52,7 +54,7 @@ final class GetReceiptsRequest extends Request implements HasBody
         } catch (JsonException $exception) {
             throw new UnexpectedValueException(
                 message: "Response could not be decoded: {$exception->getMessage()}",
-                previous: $exception
+                previous: $exception,
             );
         }
 
@@ -132,7 +134,7 @@ final class GetReceiptsRequest extends Request implements HasBody
     {
         if ($this->pushReceiptIds->count() > self::MAX_RECEIPT_COUNT) {
             throw new OverflowException(
-                "Cannot send more than " . self::MAX_RECEIPT_COUNT . " push receipt IDs per request"
+                "Cannot send more than " . self::MAX_RECEIPT_COUNT . " push receipt IDs per request",
             );
         }
     }

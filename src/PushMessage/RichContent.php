@@ -8,7 +8,8 @@ use JsonSerializable;
 
 final readonly class RichContent implements JsonSerializable
 {
-    use ConvertsFromJson, ConvertsToJson;
+    use ConvertsFromJson;
+    use ConvertsToJson;
 
     public function __construct(public string $image) {}
 }

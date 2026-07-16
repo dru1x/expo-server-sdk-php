@@ -157,7 +157,7 @@ class PushReceiptIdCollectionTest extends TestCase
         );
 
         $filteredCollection = $collection->filter(
-            fn(string $receiptId) => $receiptId !== 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'
+            fn(string $receiptId) => $receiptId !== 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
         );
 
         $this->assertCount(5, $filteredCollection);
@@ -177,7 +177,7 @@ class PushReceiptIdCollectionTest extends TestCase
         );
 
         $collection->filter(
-            fn(string $receiptId) => $receiptId !== 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'
+            fn(string $receiptId) => $receiptId !== 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
         );
 
         $this->assertCount(6, $collection);
@@ -227,12 +227,12 @@ class PushReceiptIdCollectionTest extends TestCase
         );
 
         $expectedJson = <<<JSON
-[
-  "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-  "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
-  "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ"
-]
-JSON;
+            [
+              "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+              "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+              "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ"
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($collection));
     }
@@ -247,12 +247,12 @@ JSON;
         );
 
         $expectedJson = <<<JSON
-[
-  "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-  "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
-  "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ"
-]
-JSON;
+            [
+              "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+              "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+              "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ"
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
@@ -271,7 +271,7 @@ JSON;
                 new ArrayIterator([
                     'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
                     'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
-                ])
+                ]),
             );
 
         $this->assertSame([
@@ -324,15 +324,15 @@ JSON;
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = new PushReceiptIdCollection;
+        $empty = new PushReceiptIdCollection();
         $notEmpty = new PushReceiptIdCollection('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
 
         $this->assertTrue(
-            $empty->isEmpty()
+            $empty->isEmpty(),
         );
 
         $this->assertFalse(
-            $notEmpty->isEmpty()
+            $notEmpty->isEmpty(),
         );
     }
 
@@ -349,7 +349,7 @@ JSON;
         );
 
         $filteredCollection = $collection->reject(
-            fn(string $receiptId) => $receiptId === 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'
+            fn(string $receiptId) => $receiptId === 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
         );
 
         $this->assertCount(5, $filteredCollection);

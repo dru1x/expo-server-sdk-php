@@ -17,25 +17,25 @@ class FailedPushReceiptTest extends TestCase
         $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
 
         $ticket = new FailedPushReceipt(
-            id:'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             message: '"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]" is not a registered push notification recipient',
             details: new PushReceiptDetails(
                 error: PushReceiptErrorCode::DeviceNotRegistered,
-                expoPushToken: $token
+                expoPushToken: $token,
             ),
         );
 
         $expectedJson = <<<JSON
-{
-    "details": {
-        "error": "DeviceNotRegistered",
-        "expoPushToken": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-    },
-    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-    "message": "\"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\" is not a registered push notification recipient",
-    "status": "error"
-}
-JSON;
+            {
+                "details": {
+                    "error": "DeviceNotRegistered",
+                    "expoPushToken": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+                },
+                "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                "message": "\"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\" is not a registered push notification recipient",
+                "status": "error"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($ticket));
     }
@@ -46,25 +46,25 @@ JSON;
         $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
 
         $ticket = new FailedPushReceipt(
-            id:'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             message: '"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]" is not a registered push notification recipient',
             details: new PushReceiptDetails(
                 error: PushReceiptErrorCode::DeviceNotRegistered,
-                expoPushToken: $token
+                expoPushToken: $token,
             ),
         );
 
         $expectedJson = <<<JSON
-{
-    "details": {
-        "error": "DeviceNotRegistered",
-        "expoPushToken": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-    },
-    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-    "message": "\"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\" is not a registered push notification recipient",
-    "status": "error"
-}
-JSON;
+            {
+                "details": {
+                    "error": "DeviceNotRegistered",
+                    "expoPushToken": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+                },
+                "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                "message": "\"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\" is not a registered push notification recipient",
+                "status": "error"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $ticket->toJson());
     }

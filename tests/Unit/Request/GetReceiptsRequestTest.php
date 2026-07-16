@@ -39,7 +39,7 @@ class GetReceiptsRequestTest extends TestCase
         $receiptIds = array_fill(0, 50, 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
 
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(...$receiptIds)
+            new PushReceiptIdCollection(...$receiptIds),
         );
 
         $this->mockClient->addResponse(MockResponse::make());
@@ -49,7 +49,7 @@ class GetReceiptsRequestTest extends TestCase
         $lastPendingRequest = $this->mockClient->getLastPendingRequest();
 
         $this->assertEquals('gzip', $lastPendingRequest->headers()->get('Content-Encoding'));
-        $this->assertEquals(gzencode((string)$request->body()), $lastPendingRequest->body()->all());
+        $this->assertEquals(gzencode((string) $request->body()), $lastPendingRequest->body()->all());
     }
 
     #[Test]
@@ -59,7 +59,7 @@ class GetReceiptsRequestTest extends TestCase
         $receiptIds = array_fill(0, 5, 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
 
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(...$receiptIds)
+            new PushReceiptIdCollection(...$receiptIds),
         );
 
         $this->mockClient->addResponse(MockResponse::make());
@@ -78,11 +78,11 @@ class GetReceiptsRequestTest extends TestCase
         $pushReceiptIds = [];
 
         for ($i = 0; $i <= $receiptCount; $i++) {
-            $pushReceiptIds[] = (string)$i;
+            $pushReceiptIds[] = (string) $i;
         }
 
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(...$pushReceiptIds)
+            new PushReceiptIdCollection(...$pushReceiptIds),
         );
 
         $this->expectException(OverflowException::class);
@@ -94,7 +94,7 @@ class GetReceiptsRequestTest extends TestCase
     public function create_dto_from_response_returns_push_receipt_collection(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection()
+            new PushReceiptIdCollection(),
         );
 
         $this->mockClient->addResponses([
@@ -117,12 +117,12 @@ class GetReceiptsRequestTest extends TestCase
                         ],
                     ],
                 ],
-                headers: ['Content-Type' => 'application/json']
+                headers: ['Content-Type' => 'application/json'],
             ),
         ]);
 
         $dto = $request->createDtoFromResponse(
-            $this->connector->send($request)
+            $this->connector->send($request),
         );
 
         $this->assertCount(3, $dto);
@@ -135,20 +135,20 @@ class GetReceiptsRequestTest extends TestCase
     public function create_dto_from_response_throws_exception_when_body_cannot_be_decoded(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection()
+            new PushReceiptIdCollection(),
         );
 
         $this->mockClient->addResponses([
             GetReceiptsRequest::class => MockResponse::make(
                 body: 'NOT VALID JSON',
-                headers: ['Content-Type' => 'application/json']
+                headers: ['Content-Type' => 'application/json'],
             ),
         ]);
 
         $this->expectException(UnexpectedValueException::class);
 
         $request->createDtoFromResponse(
-            $this->connector->send($request)
+            $this->connector->send($request),
         );
     }
 
@@ -163,7 +163,7 @@ class GetReceiptsRequestTest extends TestCase
         }
 
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(...$receiptIds)
+            new PushReceiptIdCollection(...$receiptIds),
         );
 
         $this->expectException(OverflowException::class);

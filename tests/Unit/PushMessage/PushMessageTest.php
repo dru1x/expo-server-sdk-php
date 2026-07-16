@@ -152,14 +152,14 @@ class PushMessageTest extends TestCase
         );
 
         $expectedJson = <<<JSON
-{
-    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
-    "title": "Test Notification", 
-    "body": "This is a test notification",
-    "data": {"key": "value", "foo": "bar"},
-    "tag": "test-tag"
-}
-JSON;
+            {
+                "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
+                "title": "Test Notification", 
+                "body": "This is a test notification",
+                "data": {"key": "value", "foo": "bar"},
+                "tag": "test-tag"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($message));
     }
@@ -176,14 +176,14 @@ JSON;
         );
 
         $expectedJson = <<<JSON
-{
-    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
-    "title": "Test Notification", 
-    "body": "This is a test notification",
-    "data": {"0":  "list", "1": "of", "2": "values"},
-    "collapseId": "test-collapse-key"
-}
-JSON;
+            {
+                "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
+                "title": "Test Notification", 
+                "body": "This is a test notification",
+                "data": {"0":  "list", "1": "of", "2": "values"},
+                "collapseId": "test-collapse-key"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $message->toJson());
     }
@@ -214,13 +214,13 @@ JSON;
     public function from_json_returns_instance(): void
     {
         $json = <<<JSON
-{
-    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
-    "title": "Test Notification", 
-    "body": "This is a test notification",
-    "richContent": {"image":  "https://example.com"}
-}
-JSON;
+            {
+                "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
+                "title": "Test Notification", 
+                "body": "This is a test notification",
+                "richContent": {"image":  "https://example.com"}
+            }
+            JSON;
 
         /** @noinspection PhpUnhandledExceptionInspection */
         $message = PushMessage::fromJson($json);
@@ -234,15 +234,15 @@ JSON;
     public function from_json_with_multiple_tokens_returns_instance(): void
     {
         $json = <<<JSON
-{
-    "to": [
-      "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
-      "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]"
-    ], 
-    "title": "Test Notification", 
-    "body": "This is a test notification"
-}
-JSON;
+            {
+                "to": [
+                  "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+                  "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]"
+                ], 
+                "title": "Test Notification", 
+                "body": "This is a test notification"
+            }
+            JSON;
 
         /** @noinspection PhpUnhandledExceptionInspection */
         $message = PushMessage::fromJson($json);

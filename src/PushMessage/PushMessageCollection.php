@@ -78,14 +78,14 @@ final class PushMessageCollection implements Collection
             $recipientTokens = $pushMessage->allTokens();
 
             // Iterate over the tokens, adding them to a split copy of the message
-            while($recipientTokens->isNotEmpty()) {
+            while ($recipientTokens->isNotEmpty()) {
 
                 // Calculate how much notification space is left in the current chunk
                 $currentChunkCapacity = $this->ensureChunkHasCapacity($size, $currentChunk, $allChunks);
 
                 // Take as many tokens as will fit in the chunk, add them to a message copy, and add it to the chunk
                 $currentChunk->add(
-                    $pushMessage->copy(to: $recipientTokens->shift($currentChunkCapacity))
+                    $pushMessage->copy(to: $recipientTokens->shift($currentChunkCapacity)),
                 );
             }
         }
@@ -100,12 +100,13 @@ final class PushMessageCollection implements Collection
      */
     public function getTokens(): PushTokenCollection
     {
-        $extractPushTokens = fn(array $carry, PushMessage $message) => array_merge($carry,
-            $message->to instanceof PushToken ? [$message->to] : $message->to->all()
+        $extractPushTokens = fn(array $carry, PushMessage $message) => array_merge(
+            $carry,
+            $message->to instanceof PushToken ? [$message->to] : $message->to->all(),
         );
 
         return new PushTokenCollection(
-            ...array_reduce($this->items, $extractPushTokens, [])
+            ...array_reduce($this->items, $extractPushTokens, []),
         );
     }
 

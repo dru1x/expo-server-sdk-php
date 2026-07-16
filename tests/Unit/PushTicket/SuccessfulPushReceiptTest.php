@@ -28,11 +28,11 @@ class SuccessfulPushReceiptTest extends TestCase
         );
 
         $expectedJson = <<<JSON
-{
-  "status": "ok", 
-  "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-}
-JSON;
+            {
+              "status": "ok", 
+              "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($receipt));
     }
@@ -45,11 +45,11 @@ JSON;
         );
 
         $expectedJson = <<<JSON
-{
-  "status": "ok", 
-  "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-}
-JSON;
+            {
+              "status": "ok", 
+              "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $receipt->toJson());
     }

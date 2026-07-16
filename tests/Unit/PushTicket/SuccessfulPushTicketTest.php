@@ -32,12 +32,12 @@ class SuccessfulPushTicketTest extends TestCase
         );
 
         $expectedJson = <<<JSON
-{
-  "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
-  "status": "ok", 
-  "receiptId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-}
-JSON;
+            {
+              "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
+              "status": "ok", 
+              "receiptId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($ticket));
     }
@@ -51,12 +51,12 @@ JSON;
         );
 
         $expectedJson = <<<JSON
-{
-  "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
-  "status": "ok", 
-  "receiptId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-}
-JSON;
+            {
+              "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", 
+              "status": "ok", 
+              "receiptId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $ticket->toJson());
     }

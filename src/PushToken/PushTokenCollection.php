@@ -45,7 +45,7 @@ final class PushTokenCollection implements Collection
         }
 
         return new self(
-            ...array_splice($this->items, 0, $count)
+            ...array_splice($this->items, 0, $count),
         );
     }
 }

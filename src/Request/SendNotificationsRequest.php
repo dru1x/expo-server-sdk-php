@@ -24,7 +24,9 @@ use UnexpectedValueException;
 
 final class SendNotificationsRequest extends Request implements HasBody
 {
-    use AcceptsJson, HasJsonBody, CompressesBody;
+    use AcceptsJson;
+    use HasJsonBody;
+    use CompressesBody;
 
     public const MAX_NOTIFICATION_COUNT = 100;
     public const MAX_MESSAGE_DATA_BYTES = 4096;
@@ -55,7 +57,7 @@ final class SendNotificationsRequest extends Request implements HasBody
         } catch (JsonException $exception) {
             throw new UnexpectedValueException(
                 message: "Response could not be decoded: {$exception->getMessage()}",
-                previous: $exception
+                previous: $exception,
             );
         }
 
@@ -113,7 +115,7 @@ final class SendNotificationsRequest extends Request implements HasBody
             details: new PushTicketDetails(
                 error: PushTicketErrorCode::tryFrom($detailsError) ?? PushTicketErrorCode::Unknown,
                 expoPushToken: $detailsToken ? new PushToken($detailsToken) : null,
-            )
+            ),
         );
     }
 
@@ -139,7 +141,7 @@ final class SendNotificationsRequest extends Request implements HasBody
     {
         if ($this->pushMessages->notificationCount() > self::MAX_NOTIFICATION_COUNT) {
             throw new OverflowException(
-                "Cannot send more than " . self::MAX_NOTIFICATION_COUNT . " notifications per request"
+                "Cannot send more than " . self::MAX_NOTIFICATION_COUNT . " notifications per request",
             );
         }
     }
@@ -162,14 +164,14 @@ final class SendNotificationsRequest extends Request implements HasBody
                 $dataBytes = strlen(json_encode($pushMessage->data, JSON_THROW_ON_ERROR));
             } catch (JsonException $e) {
                 throw new InvalidArgumentException(
-                    "Push message data could not be encoded as JSON: {$e->getMessage()}"
+                    "Push message data could not be encoded as JSON: {$e->getMessage()}",
                 );
             }
 
             // Check the size of the included data
             if ($dataBytes > self::MAX_MESSAGE_DATA_BYTES) {
                 throw new OverflowException(
-                    "Individual push message data cannot be larger than " . self::MAX_MESSAGE_DATA_BYTES . " bytes"
+                    "Individual push message data cannot be larger than " . self::MAX_MESSAGE_DATA_BYTES . " bytes",
                 );
             }
         }

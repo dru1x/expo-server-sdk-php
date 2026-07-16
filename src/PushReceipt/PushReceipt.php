@@ -37,7 +37,7 @@ abstract readonly class PushReceipt implements JsonSerializable
     public function jsonSerialize(): array
     {
         return array_filter(
-            get_object_vars($this)
+            get_object_vars($this),
         );
     }
 }

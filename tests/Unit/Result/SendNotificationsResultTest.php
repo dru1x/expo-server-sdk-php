@@ -25,8 +25,8 @@ class SendNotificationsResultTest extends TestCase
             errors: new PushErrorCollection(
                 new PushError(
                     code: PushErrorCode::Failed,
-                    message: 'Failed to send push notification'
-                )
+                    message: 'Failed to send push notification',
+                ),
             ),
         );
 
@@ -101,7 +101,7 @@ class SendNotificationsResultTest extends TestCase
                         error: PushTicketErrorCode::Unknown,
                         expoPushToken: $token,
                     ),
-                )
+                ),
             ),
             errors: new PushErrorCollection(),
         );
@@ -122,8 +122,8 @@ class SendNotificationsResultTest extends TestCase
                     details: new PushTicketDetails(
                         error: PushTicketErrorCode::Unknown,
                         expoPushToken: $token,
-                    )
-                )
+                    ),
+                ),
             ),
             errors: new PushErrorCollection(),
         );

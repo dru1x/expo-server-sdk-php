@@ -11,7 +11,8 @@ use Stringable;
 
 final readonly class PushToken implements JsonSerializable, Stringable
 {
-    use ConvertsFromJson, ConvertsToJson;
+    use ConvertsFromJson;
+    use ConvertsToJson;
 
     public function __construct(public string $value)
     {
@@ -38,7 +39,7 @@ final readonly class PushToken implements JsonSerializable, Stringable
     public static function fromJson(string $json): self
     {
         return self::fromString(
-            self::jsonDecode($json)
+            self::jsonDecode($json),
         );
     }
 

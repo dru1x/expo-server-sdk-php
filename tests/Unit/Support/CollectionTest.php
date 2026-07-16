@@ -178,11 +178,11 @@ class CollectionTest extends TestCase
         $notEmpty = Collection::make(0);
 
         $this->assertTrue(
-            $empty->isEmpty()
+            $empty->isEmpty(),
         );
 
         $this->assertFalse(
-            $notEmpty->isEmpty()
+            $notEmpty->isEmpty(),
         );
     }
 
@@ -209,8 +209,8 @@ class CollectionTest extends TestCase
         return [
             'array' => [[1, 2]],
             'iterable' => [new ArrayIterator([1, 2])],
-            'generator' => [(function() {
-                foreach([1, 2] as $item) {
+            'generator' => [(function () {
+                foreach ([1, 2] as $item) {
                     yield $item;
                 }
             })()],
@@ -313,8 +313,8 @@ class CollectionTest extends TestCase
         return [
             'array' => [[1, 2]],
             'iterable' => [new ArrayIterator([1, 2])],
-            'generator' => [(function() {
-                foreach([1, 2] as $item) {
+            'generator' => [(function () {
+                foreach ([1, 2] as $item) {
                     yield $item;
                 }
             })()],
