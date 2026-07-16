@@ -90,7 +90,7 @@ final class GetReceiptsRequest extends Request implements HasBody
      * Make a FailedPushReceipt from the given data
      *
      * @param string $id
-     * @param array{message: string, details: array{error?: string, expoPushToken?: string} $data
+     * @param array{message: string, details: array{error?: string, expoPushToken?: string}} $data
      *
      * @return FailedPushReceipt
      */

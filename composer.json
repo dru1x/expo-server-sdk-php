@@ -30,14 +30,17 @@
     "saloonphp/rate-limit-plugin": "^2.0"
   },
   "require-dev": {
-    "phpstan/phpstan": "^v2.2",
+    "friendsofphp/php-cs-fixer": "^3.95",
     "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan": "^v2.2",
     "phpstan/phpstan-phpunit": "^2.0",
     "phpunit/phpunit": "^11.5"
   },
   "scripts": {
+    "format": "@php vendor/bin/php-cs-fixer fix --ansi",
     "analyse": "@php vendor/bin/phpstan analyse --verbose --ansi",
     "lint": [
+      "@format",
       "@analyse"
     ],
     "test": "vendor/bin/phpunit --testdox",
