@@ -22,6 +22,7 @@ use PHPUnit\Framework\TestCase;
 use Saloon\Config;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
+use Saloon\RateLimitPlugin\Stores\MemoryStore;
 
 class ExpoPushTest extends TestCase
 {
@@ -546,6 +547,17 @@ class ExpoPushTest extends TestCase
         $this->assertTrue($result->hasErrors());
         $this->assertCount(1, $result->errors);
         $this->assertEquals(PushErrorCode::PushTooManyReceipts, $result->errors->get(0)->code);
+    }
+
+    #[Test]
+    public function custom_rate_limit_store_is_passed_to_connector(): void
+    {
+        $store    = new MemoryStore();
+        $expoPush = new ExpoPush(rateLimitStore: $store);
+
+        $connector = (new ReflectionProperty(ExpoPush::class, 'connector'))->getValue($expoPush);
+
+        $this->assertSame($store, $connector->rateLimitStore());
     }
 
     #[Test]
