@@ -22,7 +22,7 @@ final class PushTokenCollection implements Collection
     }
 
     /**
-     * @param array<mixed> $data
+     * @param array<string> $data
      */
     public static function fromArray(array $data): self
     {
