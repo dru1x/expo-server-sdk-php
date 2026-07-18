@@ -100,7 +100,7 @@ final readonly class PushMessage implements JsonSerializable
     /**
      * @inheritDoc
      *
-     * @return array<mixed>
+     * @return array<string, mixed>
      */
     public function jsonSerialize(): array
     {

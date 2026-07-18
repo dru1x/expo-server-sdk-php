@@ -27,4 +27,4 @@ jobs:
         run: composer install --no-interaction --no-progress
 
       - name: Run analysis
-        run: php vendor/bin/php-cs-fixer fix --ansi
+        run: php vendor/bin/php-cs-fixer check --ansi

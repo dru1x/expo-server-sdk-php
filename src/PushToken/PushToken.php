@@ -65,16 +65,16 @@ final readonly class PushToken implements JsonSerializable, Stringable
      */
     protected function isValidTokenValue(string $value): bool
     {
-        if(str_starts_with($value, 'ExponentPushToken[') and str_ends_with($value, ']')) {
+        if (str_starts_with($value, 'ExponentPushToken[') and str_ends_with($value, ']')) {
             return true;
         }
 
-        if(str_starts_with($value, 'ExpoPushToken[') and str_ends_with($value, ']')) {
+        if (str_starts_with($value, 'ExpoPushToken[') and str_ends_with($value, ']')) {
             return true;
         }
 
         // UUID-like legacy format
-        if(preg_match('/^[a-z\d]{8}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{12}$/', $this->value)) {
+        if (preg_match('/^[a-z\d]{8}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{12}$/', $this->value)) {
             return true;
         }
 

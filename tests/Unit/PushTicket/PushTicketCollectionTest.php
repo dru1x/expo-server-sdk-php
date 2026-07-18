@@ -46,20 +46,19 @@ class PushTicketCollectionTest extends TestCase
     {
         $collection = new PushTicketCollection();
 
-        $collection->set(
-            9,
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            ),
+        $setTicket = new SuccessfulPushTicket(
+            token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
         );
+
+        $collection->set(9, $setTicket);
 
         $this->assertCount(1, $collection);
         $this->assertNull($collection->get(0));
 
-        $pushTicket = $collection->get(9);
-        $this->assertInstanceOf(SuccessfulPushTicket::class, $pushTicket);
-        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $pushTicket->receiptId);
+        $getTicket = $collection->get(9);
+        $this->assertInstanceOf(SuccessfulPushTicket::class, $getTicket);
+        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $getTicket->receiptId);
     }
 
     #[Test]
@@ -72,19 +71,18 @@ class PushTicketCollectionTest extends TestCase
             ),
         );
 
-        $collection->set(
-            0,
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-                receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-            ),
+        $setTicket = new SuccessfulPushTicket(
+            token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
         );
+
+        $collection->set(0, $setTicket);
 
         $this->assertCount(1, $collection);
 
-        $pushTicket = $collection->get(0);
-        $this->assertInstanceOf(SuccessfulPushTicket::class, $pushTicket);
-        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $pushTicket->receiptId);
+        $getTicket = $collection->get(0);
+        $this->assertInstanceOf(SuccessfulPushTicket::class, $getTicket);
+        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $getTicket->receiptId);
     }
 
     #[Test]

@@ -5,7 +5,7 @@ namespace Dru1x\ExpoPush\PushError;
 final readonly class PushError
 {
     /**
-     * @param ?array<mixed> $details
+     * @param ?array<string, mixed> $details
      */
     public function __construct(
         public PushErrorCode $code,
