@@ -43,20 +43,20 @@ class FailedPushTicketTest extends TestCase
             details: new PushTicketDetails(
                 error: PushTicketErrorCode::DeviceNotRegistered,
                 expoPushToken: $token,
-            )
+            ),
         );
 
         $expectedJson = <<<JSON
-{
-  "details": {
-    "error": "DeviceNotRegistered",
-    "expoPushToken": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-  },
-  "message": "\"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\" is not a registered push notification recipient",
-  "status": "error",
-  "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-}
-JSON;
+            {
+              "details": {
+                "error": "DeviceNotRegistered",
+                "expoPushToken": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+              },
+              "message": "\"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\" is not a registered push notification recipient",
+              "status": "error",
+              "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($ticket));
     }
@@ -72,20 +72,20 @@ JSON;
             details: new PushTicketDetails(
                 error: PushTicketErrorCode::DeviceNotRegistered,
                 expoPushToken: $token,
-            )
+            ),
         );
 
         $expectedJson = <<<JSON
-{
-  "details": {
-    "error": "DeviceNotRegistered",
-    "expoPushToken": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-  },
-  "message": "\"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\" is not a registered push notification recipient",
-  "status": "error",
-  "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-}
-JSON;
+            {
+              "details": {
+                "error": "DeviceNotRegistered",
+                "expoPushToken": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+              },
+              "message": "\"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\" is not a registered push notification recipient",
+              "status": "error",
+              "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+            }
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $ticket->toJson());
     }

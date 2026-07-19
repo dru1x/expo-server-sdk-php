@@ -7,6 +7,8 @@ use Dru1x\ExpoPush\Support\CollectionMethods;
 
 /**
  * A collection of PushError objects
+ *
+ * @implements Collection<int, PushError>
  */
 final class PushErrorCollection implements Collection
 {

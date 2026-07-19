@@ -1,0 +1,30 @@
+name: Format
+
+on:
+  push:
+    paths:
+      - '**.php'
+      - '.php-cs-fixer.dist.php'
+
+jobs:
+  format:
+    name: PHP 8.2
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: composer:v2
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Run analysis
+        run: php vendor/bin/php-cs-fixer check --ansi

@@ -15,7 +15,7 @@ trait CompressesBody
         $pendingRequest->middleware()->onRequest(
             callable: $this->compressBody(...),
             name: 'compressBody',
-            order: PipeOrder::LAST
+            order: PipeOrder::LAST,
         );
     }
 
@@ -28,7 +28,7 @@ trait CompressesBody
      */
     protected function compressBody(PendingRequest $pendingRequest): void
     {
-        $bodyString = (string)$pendingRequest->body();
+        $bodyString = (string) $pendingRequest->body();
 
         if (strlen($bodyString) > self::COMPRESSION_THRESHOLD) {
             $pendingRequest->headers()->add('Content-Encoding', 'gzip');

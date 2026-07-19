@@ -7,6 +7,8 @@ use Dru1x\ExpoPush\Support\CollectionMethods;
 
 /**
  * A collection of push receipt IDs
+ *
+ * @implements Collection<int, string>
  */
 final class PushReceiptIdCollection implements Collection
 {

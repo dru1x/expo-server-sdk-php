@@ -13,7 +13,8 @@ use Traversable;
  */
 trait CollectionMethods
 {
-    use ConvertsFromJson, ConvertsToJson;
+    use ConvertsFromJson;
+    use ConvertsToJson;
 
     /**
      * The items contained in the collection
@@ -47,7 +48,7 @@ trait CollectionMethods
     {
         $array = iterator_to_array($items);
 
-        $self = new static;
+        $self = new static();
         $self->items = $array;
 
         return $self;
@@ -191,7 +192,7 @@ trait CollectionMethods
         $callable ??= fn(mixed $item) => $item;
 
         return static::fromIterable(
-            array_filter($this->items, $callable, ARRAY_FILTER_USE_BOTH)
+            array_filter($this->items, $callable, ARRAY_FILTER_USE_BOTH),
         );
     }
 

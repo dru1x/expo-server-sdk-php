@@ -27,8 +27,8 @@ class GetReceiptsResultTest extends TestCase
             errors: new PushErrorCollection(
                 new PushError(
                     code: PushErrorCode::Failed,
-                    message: 'Failed to get push receipts'
-                )
+                    message: 'Failed to get push receipts',
+                ),
             ),
         );
 
@@ -91,7 +91,7 @@ class GetReceiptsResultTest extends TestCase
                 new FailedPushReceipt('receipt-1', 'Unknown error', new PushReceiptDetails(
                     error: PushReceiptErrorCode::Unknown,
                     expoPushToken: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                ))
+                )),
             ),
             errors: new PushErrorCollection(),
         );
@@ -107,7 +107,7 @@ class GetReceiptsResultTest extends TestCase
                 new FailedPushReceipt('receipt-1', 'Unknown error', new PushReceiptDetails(
                     error: PushReceiptErrorCode::Unknown,
                     expoPushToken: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                ))
+                )),
             ),
             errors: new PushErrorCollection(),
         );

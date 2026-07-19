@@ -1,0 +1,11 @@
+parameters:
+
+    paths:
+        - src/
+
+    # Level 10 is the highest level
+    level: 6
+
+    reportUnmatchedIgnoredErrors: false
+    checkNullables: true
+    treatPhpDocTypesAsCertain: false

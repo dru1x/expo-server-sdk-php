@@ -16,7 +16,7 @@ trait ConvertsFromJson
     public static function fromJson(string $json): static
     {
         return static::fromArray(
-            static::jsonDecode($json)
+            static::jsonDecode($json),
         );
     }
 

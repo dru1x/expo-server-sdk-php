@@ -54,8 +54,8 @@ class ExpoPushTest extends TestCase
         $this->mockClient->addResponse(
             MockResponse::make(
                 body: $responseBody,
-                headers: ['Content-Type' => 'application/json']
-            )
+                headers: ['Content-Type' => 'application/json'],
+            ),
         );
 
         $messages = new PushMessageCollection(
@@ -95,8 +95,8 @@ class ExpoPushTest extends TestCase
             $this->mockClient->addResponse(
                 MockResponse::make(
                     body: $responseBody,
-                    headers: ['Content-Type' => 'application/json']
-                )
+                    headers: ['Content-Type' => 'application/json'],
+                ),
             );
         }
 
@@ -121,7 +121,7 @@ class ExpoPushTest extends TestCase
         $this->mockClient->addResponse(
             MockResponse::make(
                 body: $responseData,
-                headers: ['Content-Type' => 'application/json']
+                headers: ['Content-Type' => 'application/json'],
             ),
         );
 
@@ -162,8 +162,8 @@ class ExpoPushTest extends TestCase
             $this->mockClient->addResponse(
                 MockResponse::make(
                     body: $responseBody,
-                    headers: ['Content-Type' => 'application/json']
-                )
+                    headers: ['Content-Type' => 'application/json'],
+                ),
             );
         }
 
@@ -202,8 +202,8 @@ class ExpoPushTest extends TestCase
         $this->mockClient->addResponse(
             MockResponse::make(
                 body: $responseBody,
-                headers: ['Content-Type' => 'application/json']
-            )
+                headers: ['Content-Type' => 'application/json'],
+            ),
         );
 
         $result = $this->service->sendNotification($message);
@@ -225,7 +225,7 @@ class ExpoPushTest extends TestCase
         ];
 
         $this->mockClient->addResponse(
-            MockResponse::make(body: $responseBody, headers: ['Content-Type' => 'application/json'])
+            MockResponse::make(body: $responseBody, headers: ['Content-Type' => 'application/json']),
         );
 
         $messages = new PushMessageCollection(
@@ -242,7 +242,7 @@ class ExpoPushTest extends TestCase
         $this->assertTrue($result->hasFailedTickets());
 
         $this->assertInstanceOf(SuccessfulPushTicket::class, $result->tickets->get(0));
-        $this->assertInstanceOf(FailedPushTicket::class,     $result->tickets->get(1));
+        $this->assertInstanceOf(FailedPushTicket::class, $result->tickets->get(1));
         $this->assertInstanceOf(SuccessfulPushTicket::class, $result->tickets->get(2));
 
         /** @var FailedPushTicket $failedTicket */
@@ -269,8 +269,8 @@ class ExpoPushTest extends TestCase
                             ],
                         ],
                         status: 400,
-                        headers: ['Content-Type' => 'application/json']
-                    )
+                        headers: ['Content-Type' => 'application/json'],
+                    ),
                 );
 
                 continue;
@@ -286,8 +286,8 @@ class ExpoPushTest extends TestCase
             $this->mockClient->addResponse(
                 MockResponse::make(
                     body: $responseBody,
-                    headers: ['Content-Type' => 'application/json']
-                )
+                    headers: ['Content-Type' => 'application/json'],
+                ),
             );
         }
 
@@ -326,8 +326,8 @@ class ExpoPushTest extends TestCase
                             ],
                         ],
                         status: 400,
-                        headers: ['Content-Type' => 'application/json']
-                    )
+                        headers: ['Content-Type' => 'application/json'],
+                    ),
                 );
 
                 continue;
@@ -343,8 +343,8 @@ class ExpoPushTest extends TestCase
             $this->mockClient->addResponse(
                 MockResponse::make(
                     body: $responseBody,
-                    headers: ['Content-Type' => 'application/json']
-                )
+                    headers: ['Content-Type' => 'application/json'],
+                ),
             );
         }
 
@@ -371,7 +371,7 @@ class ExpoPushTest extends TestCase
         $this->mockClient->addResponse(
             MockResponse::make(
                 body: $responseData,
-                headers: ['Content-Type' => 'application/json']
+                headers: ['Content-Type' => 'application/json'],
             ),
         );
 
@@ -389,7 +389,8 @@ class ExpoPushTest extends TestCase
 
         foreach ($result->receipts as $receipt) {
             $this->assertEquals(PushStatus::Ok, $receipt->status);
-            $this->assertTrue($receiptIds->contains($receipt->id));;
+            $this->assertTrue($receiptIds->contains($receipt->id));
+            ;
         }
     }
 
@@ -407,7 +408,7 @@ class ExpoPushTest extends TestCase
         $this->mockClient->addResponse(
             MockResponse::make(
                 body: $responseData,
-                headers: ['Content-Type' => 'application/json']
+                headers: ['Content-Type' => 'application/json'],
             ),
         );
 
@@ -459,8 +460,8 @@ class ExpoPushTest extends TestCase
                             ],
                         ],
                         status: 400,
-                        headers: ['Content-Type' => 'application/json']
-                    )
+                        headers: ['Content-Type' => 'application/json'],
+                    ),
                 );
 
                 continue;
@@ -469,15 +470,15 @@ class ExpoPushTest extends TestCase
             $responseBody = [
                 'data' => array_combine(
                     $receiptIdChunk->toArray(),
-                    array_fill(0, count($receiptIdChunk), ['status' => 'ok'])
+                    array_fill(0, count($receiptIdChunk), ['status' => 'ok']),
                 ),
             ];
 
             $this->mockClient->addResponse(
                 MockResponse::make(
                     body: $responseBody,
-                    headers: ['Content-Type' => 'application/json']
-                )
+                    headers: ['Content-Type' => 'application/json'],
+                ),
             );
         }
 
@@ -516,8 +517,8 @@ class ExpoPushTest extends TestCase
                             ],
                         ],
                         status: 400,
-                        headers: ['Content-Type' => 'application/json']
-                    )
+                        headers: ['Content-Type' => 'application/json'],
+                    ),
                 );
 
                 continue;
@@ -526,15 +527,15 @@ class ExpoPushTest extends TestCase
             $responseBody = [
                 'data' => array_combine(
                     $receiptIdChunk->toArray(),
-                    array_fill(0, count($receiptIdChunk), ['status' => 'ok'])
+                    array_fill(0, count($receiptIdChunk), ['status' => 'ok']),
                 ),
             ];
 
             $this->mockClient->addResponse(
                 MockResponse::make(
                     body: $responseBody,
-                    headers: ['Content-Type' => 'application/json']
-                )
+                    headers: ['Content-Type' => 'application/json'],
+                ),
             );
         }
 
@@ -551,12 +552,12 @@ class ExpoPushTest extends TestCase
     public function sdk_version_returns_correct_version(): void
     {
         $composer = json_decode(
-            file_get_contents(dirname(__DIR__, 2) . '/composer.json')
+            file_get_contents(dirname(__DIR__, 2) . '/composer.json'),
         );
 
         $this->assertSame(
             InstalledVersions::getPrettyVersion($composer->name),
-            $this->service->sdkVersion()
+            $this->service->sdkVersion(),
         );
     }
 

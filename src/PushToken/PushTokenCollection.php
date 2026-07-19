@@ -8,6 +8,8 @@ use InvalidArgumentException;
 
 /**
  * A collection of PushToken objects
+ *
+ * @implements Collection<int, PushToken>
  */
 final class PushTokenCollection implements Collection
 {
@@ -19,6 +21,9 @@ final class PushTokenCollection implements Collection
         $this->items = $pushTokens;
     }
 
+    /**
+     * @param array<string> $data
+     */
     public static function fromArray(array $data): self
     {
         $tokens = array_map(PushToken::fromString(...), $data);
@@ -40,7 +45,7 @@ final class PushTokenCollection implements Collection
         }
 
         return new self(
-            ...array_splice($this->items, 0, $count)
+            ...array_splice($this->items, 0, $count),
         );
     }
 }

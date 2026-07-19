@@ -16,7 +16,7 @@ class PushErrorCollectionTest extends TestCase
     public function add_appends_message_to_collection(): void
     {
         $collection = new PushErrorCollection(
-            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send')
+            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
         );
 
         $collection->add(new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'));
@@ -49,7 +49,7 @@ class PushErrorCollectionTest extends TestCase
     public function set_replaces_message_in_collection_at_index(): void
     {
         $collection = new PushErrorCollection(
-            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send')
+            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
         );
 
         $collection->set(0, new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'));
@@ -230,30 +230,30 @@ class PushErrorCollectionTest extends TestCase
         );
 
         $expectedJson = <<<JSON
-[
-    {
-        "code": "FAILED",
-        "message": "Push notifications failed to send",
-        "details": null,
-        "endIndex": null,
-        "startIndex": null
-    },
-    {
-        "code": "UNKNOWN",
-        "message": "Unknown error",
-        "details": null,
-        "endIndex": null,
-        "startIndex": null
-    },
-    {
-        "code": "UNAUTHORIZED",
-        "message": "Invalid authentication token",
-        "details": null,
-        "endIndex": null,
-        "startIndex": null
-    }
-]
-JSON;
+            [
+                {
+                    "code": "FAILED",
+                    "message": "Push notifications failed to send",
+                    "details": null,
+                    "endIndex": null,
+                    "startIndex": null
+                },
+                {
+                    "code": "UNKNOWN",
+                    "message": "Unknown error",
+                    "details": null,
+                    "endIndex": null,
+                    "startIndex": null
+                },
+                {
+                    "code": "UNAUTHORIZED",
+                    "message": "Invalid authentication token",
+                    "details": null,
+                    "endIndex": null,
+                    "startIndex": null
+                }
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($collection));
     }
@@ -268,30 +268,30 @@ JSON;
         );
 
         $expectedJson = <<<JSON
-[
-    {
-        "code": "FAILED",
-        "message": "Push notifications failed to send",
-        "details": null,
-        "endIndex": null,
-        "startIndex": null
-    },
-    {
-        "code": "UNKNOWN",
-        "message": "Unknown error",
-        "details": null,
-        "endIndex": null,
-        "startIndex": null
-    },
-    {
-        "code": "UNAUTHORIZED",
-        "message": "Invalid authentication token",
-        "details": null,
-        "endIndex": null,
-        "startIndex": null
-    }
-]
-JSON;
+            [
+                {
+                    "code": "FAILED",
+                    "message": "Push notifications failed to send",
+                    "details": null,
+                    "endIndex": null,
+                    "startIndex": null
+                },
+                {
+                    "code": "UNKNOWN",
+                    "message": "Unknown error",
+                    "details": null,
+                    "endIndex": null,
+                    "startIndex": null
+                },
+                {
+                    "code": "UNAUTHORIZED",
+                    "message": "Invalid authentication token",
+                    "details": null,
+                    "endIndex": null,
+                    "startIndex": null
+                }
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
@@ -309,7 +309,7 @@ JSON;
                 new ArrayIterator([
                     new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
                     new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-                ])
+                ]),
             );
 
         $this->assertEquals([
@@ -361,18 +361,18 @@ JSON;
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = new PushErrorCollection;
+        $empty = new PushErrorCollection();
 
         $notEmpty = new PushErrorCollection(
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
         );
 
         $this->assertTrue(
-            $empty->isEmpty()
+            $empty->isEmpty(),
         );
 
         $this->assertFalse(
-            $notEmpty->isEmpty()
+            $notEmpty->isEmpty(),
         );
     }
 
@@ -388,7 +388,7 @@ JSON;
         );
 
         $filteredCollection = $collection->reject(
-            fn(PushError $error) => $error->code === PushErrorCode::Unknown
+            fn(PushError $error) => $error->code === PushErrorCode::Unknown,
         );
 
         $this->assertCount(3, $filteredCollection);

@@ -80,7 +80,8 @@ class PushReceiptCollectionTest extends TestCase
             new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
         );
 
-        $receipt = $collection->getById('ABCDEFGH-ABCDEF-ABCDEF-ABCDEF-ABCDEFGHIJKL');;
+        $receipt = $collection->getById('ABCDEFGH-ABCDEF-ABCDEF-ABCDEF-ABCDEFGHIJKL');
+        ;
 
         $this->assertNull($receipt);
     }
@@ -196,7 +197,7 @@ class PushReceiptCollectionTest extends TestCase
         );
 
         $filteredCollection = $collection->filter(
-            fn(SuccessfulPushReceipt $receipt) => $receipt->id !== 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+            fn(SuccessfulPushReceipt $receipt) => $receipt->id !== 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
         );
 
         $this->assertCount(5, $filteredCollection);
@@ -216,7 +217,7 @@ class PushReceiptCollectionTest extends TestCase
         );
 
         $collection->filter(
-            fn(SuccessfulPushReceipt $receipt) => $receipt->id !== 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+            fn(SuccessfulPushReceipt $receipt) => $receipt->id !== 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
         );
 
         $this->assertCount(6, $collection);
@@ -231,7 +232,7 @@ class PushReceiptCollectionTest extends TestCase
         );
 
         $collection->set(9, new SuccessfulPushReceipt(
-            id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'
+            id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         ));
 
         $newCollection = $collection->values();
@@ -268,21 +269,21 @@ class PushReceiptCollectionTest extends TestCase
         );
 
         $expectedJson = <<<JSON
-[
-  {
-    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-    "status": "ok"
-  },
-  {
-    "id": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
-    "status": "ok"
-  },
-  {
-    "id": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
-    "status": "ok"
-  }
-]
-JSON;
+            [
+              {
+                "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                "status": "ok"
+              },
+              {
+                "id": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+                "status": "ok"
+              },
+              {
+                "id": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
+                "status": "ok"
+              }
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($collection));
     }
@@ -297,21 +298,21 @@ JSON;
         );
 
         $expectedJson = <<<JSON
-[
-  {
-    "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-    "status": "ok"
-  },
-  {
-    "id": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
-    "status": "ok"
-  },
-  {
-    "id": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
-    "status": "ok"
-  }
-]
-JSON;
+            [
+              {
+                "id": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                "status": "ok"
+              },
+              {
+                "id": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+                "status": "ok"
+              },
+              {
+                "id": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
+                "status": "ok"
+              }
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
@@ -329,7 +330,7 @@ JSON;
                 new ArrayIterator([
                     new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
                     new SuccessfulPushReceipt(id: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB'),
-                ])
+                ]),
             );
 
         $this->assertEquals([
@@ -381,18 +382,18 @@ JSON;
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = new PushReceiptCollection;
+        $empty = new PushReceiptCollection();
 
         $notEmpty = new PushReceiptCollection(
             new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
         );
 
         $this->assertTrue(
-            $empty->isEmpty()
+            $empty->isEmpty(),
         );
 
         $this->assertFalse(
-            $notEmpty->isEmpty()
+            $notEmpty->isEmpty(),
         );
     }
 
@@ -409,7 +410,7 @@ JSON;
         );
 
         $filteredCollection = $collection->reject(
-            fn(SuccessfulPushReceipt $receipt) => $receipt->id === 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'
+            fn(SuccessfulPushReceipt $receipt) => $receipt->id === 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
         );
 
         $this->assertCount(5, $filteredCollection);

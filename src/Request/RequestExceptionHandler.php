@@ -31,7 +31,7 @@ final class RequestExceptionHandler
         }
 
         // A rate limit was reached
-        if($exception instanceof RateLimitReachedException){
+        if ($exception instanceof RateLimitReachedException) {
             $this->errors->add(new PushError(
                 code: PushErrorCode::TooManyRequests,
                 message: $exception->getMessage(),

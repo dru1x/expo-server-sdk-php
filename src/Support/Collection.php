@@ -10,6 +10,8 @@ use Traversable;
 /**
  * @template TKey of array-key
  * @template TValue
+ *
+ * @template-extends IteratorAggregate<TKey, TValue>
  */
 interface Collection extends Countable, IteratorAggregate, JsonSerializable
 {

@@ -64,7 +64,7 @@ class PushTokenTest extends TestCase
     {
         $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
 
-        $this->assertEquals('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', (string)$token);
+        $this->assertEquals('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', (string) $token);
     }
 
     #[Test]
@@ -81,8 +81,8 @@ class PushTokenTest extends TestCase
         $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
 
         $expectedJson = <<<JSON
-"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-JSON;
+            "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($token));
     }
@@ -93,8 +93,8 @@ JSON;
         $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
 
         $expectedJson = <<<JSON
-"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-JSON;
+            "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $token->toJson());
     }

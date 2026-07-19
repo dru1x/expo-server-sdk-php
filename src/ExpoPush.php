@@ -44,7 +44,7 @@ class ExpoPush
      *
      * This supports request concurrency, with up to 6 requests being sent at once
      *
-     * @param PushMessageCollection|PushMessage[] $pushMessages
+     * @param PushMessageCollection|array<PushMessage> $pushMessages
      *
      * @return SendNotificationsResult
      * @throws InvalidPoolItemException
@@ -108,7 +108,7 @@ class ExpoPush
      *
      * This supports request concurrency, with up to 6 requests being sent at once
      *
-     * @param PushReceiptIdCollection|string[] $receiptIds
+     * @param PushReceiptIdCollection|array<string> $receiptIds
      *
      * @return GetReceiptsResult
      * @throws InvalidPoolItemException

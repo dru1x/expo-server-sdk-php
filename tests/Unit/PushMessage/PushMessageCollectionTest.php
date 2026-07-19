@@ -20,13 +20,13 @@ class PushMessageCollectionTest extends TestCase
         $collection = new PushMessageCollection(
             new PushMessage(
                 to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                title: 'Test Notification 1'
-            )
+                title: 'Test Notification 1',
+            ),
         );
 
         $collection->add(new PushMessage(
             to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-            title: 'Test Notification 2'
+            title: 'Test Notification 2',
         ));
 
         $this->assertCount(2, $collection);
@@ -45,7 +45,7 @@ class PushMessageCollectionTest extends TestCase
 
         $collection->set(9, new PushMessage(
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-            title: 'Test Notification 9'
+            title: 'Test Notification 9',
         ));
 
         $this->assertCount(1, $collection);
@@ -62,13 +62,13 @@ class PushMessageCollectionTest extends TestCase
         $collection = new PushMessageCollection(
             new PushMessage(
                 to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                title: 'Test Notification 1'
-            )
+                title: 'Test Notification 1',
+            ),
         );
 
         $collection->set(0, new PushMessage(
             to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-            title: 'Test Notification 2'
+            title: 'Test Notification 2',
         ));
 
         $this->assertCount(1, $collection);
@@ -272,7 +272,7 @@ class PushMessageCollectionTest extends TestCase
         );
 
         $filteredCollection = $collection->filter(
-            fn(PushMessage $message) => $message->to->value !== 'ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'
+            fn(PushMessage $message) => $message->to->value !== 'ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]',
         );
 
         $this->assertCount(4, $filteredCollection);
@@ -291,7 +291,7 @@ class PushMessageCollectionTest extends TestCase
         );
 
         $collection->filter(
-            fn(PushMessage $message) => $message->to->value !== 'ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'
+            fn(PushMessage $message) => $message->to->value !== 'ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]',
         );
 
         $this->assertCount(5, $collection);
@@ -436,13 +436,13 @@ class PushMessageCollectionTest extends TestCase
         $collection = new PushMessageCollection(
             new PushMessage(
                 to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                title: 'Test Notification 1'
+                title: 'Test Notification 1',
             ),
         );
 
         $collection->set(9, new PushMessage(
             to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-            title: 'Test Notification 2'
+            title: 'Test Notification 2',
         ));
 
         $newCollection = $collection->values();
@@ -479,21 +479,21 @@ class PushMessageCollectionTest extends TestCase
         );
 
         $expectedJson = <<<JSON
-[
-  {
-    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
-    "title": "Test Notification 1"
-  },
-  {
-    "to": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
-    "title": "Test Notification 2"
-  },
-  {
-    "to": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]",
-    "title": "Test Notification 3"
-  }
-]
-JSON;
+            [
+              {
+                "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+                "title": "Test Notification 1"
+              },
+              {
+                "to": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
+                "title": "Test Notification 2"
+              },
+              {
+                "to": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]",
+                "title": "Test Notification 3"
+              }
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($collection));
     }
@@ -508,21 +508,21 @@ JSON;
         );
 
         $expectedJson = <<<JSON
-[
-  {
-    "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
-    "title": "Test Notification 1"
-  },
-  {
-    "to": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
-    "title": "Test Notification 2"
-  },
-  {
-    "to": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]",
-    "title": "Test Notification 3"
-  }
-]
-JSON;
+            [
+              {
+                "to": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+                "title": "Test Notification 1"
+              },
+              {
+                "to": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
+                "title": "Test Notification 2"
+              },
+              {
+                "to": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]",
+                "title": "Test Notification 3"
+              }
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
@@ -540,7 +540,7 @@ JSON;
                 new ArrayIterator([
                     new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
                     new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-                ])
+                ]),
             );
 
         $this->assertEquals([
@@ -592,18 +592,18 @@ JSON;
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = new PushMessageCollection;
+        $empty = new PushMessageCollection();
 
         $notEmpty = new PushMessageCollection(
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
         );
 
         $this->assertTrue(
-            $empty->isEmpty()
+            $empty->isEmpty(),
         );
 
         $this->assertFalse(
-            $notEmpty->isEmpty()
+            $notEmpty->isEmpty(),
         );
     }
 
@@ -619,7 +619,7 @@ JSON;
         );
 
         $filteredCollection = $collection->reject(
-            fn(PushMessage $message) => $message->title === 'Test Notification 4'
+            fn(PushMessage $message) => $message->title === 'Test Notification 4',
         );
 
         $this->assertCount(4, $filteredCollection);

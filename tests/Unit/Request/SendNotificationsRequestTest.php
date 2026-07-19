@@ -43,11 +43,11 @@ class SendNotificationsRequestTest extends TestCase
         // Approximately 1800 bytes of data
         $pushMessages = array_fill(0, 25, new PushMessage(
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-            title: "Test Notification"
+            title: "Test Notification",
         ));
 
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(...$pushMessages)
+            new PushMessageCollection(...$pushMessages),
         );
 
         $this->mockClient->addResponse(MockResponse::make());
@@ -57,7 +57,7 @@ class SendNotificationsRequestTest extends TestCase
         $lastPendingRequest = $this->mockClient->getLastPendingRequest();
 
         $this->assertEquals('gzip', $lastPendingRequest->headers()->get('Content-Encoding'));
-        $this->assertEquals(gzencode((string)$request->body()), $lastPendingRequest->body()->all());
+        $this->assertEquals(gzencode((string) $request->body()), $lastPendingRequest->body()->all());
     }
 
     #[Test]
@@ -66,11 +66,11 @@ class SendNotificationsRequestTest extends TestCase
         // Approximately 360 bytes of data
         $pushMessages = array_fill(0, 5, new PushMessage(
             to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-            title: "Test Notification"
+            title: "Test Notification",
         ));
 
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(...$pushMessages)
+            new PushMessageCollection(...$pushMessages),
         );
 
         $this->mockClient->addResponse(MockResponse::make());
@@ -89,18 +89,18 @@ class SendNotificationsRequestTest extends TestCase
         $messages = new PushMessageCollection(
             new PushMessage(
                 to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                title: 'Test Notification 1'
+                title: 'Test Notification 1',
             ),
             new PushMessage(
                 to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-                title: 'Test Notification 2'
+                title: 'Test Notification 2',
             ),
             new PushMessage(
                 to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 title: 'Test Notification 3',
                 data: [
                     'content' => $content,
-                ]
+                ],
             ),
         );
 
@@ -119,7 +119,7 @@ class SendNotificationsRequestTest extends TestCase
                 new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]')),
                 new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]')),
                 new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]')),
-            )
+            ),
         );
 
         $this->mockClient->addResponses([
@@ -144,12 +144,12 @@ class SendNotificationsRequestTest extends TestCase
                         ],
                     ],
                 ],
-                headers: ['Content-Type' => 'application/json']
+                headers: ['Content-Type' => 'application/json'],
             ),
         ]);
 
         $dto = $request->createDtoFromResponse(
-            $this->connector->send($request)
+            $this->connector->send($request),
         );
 
         $this->assertCount(3, $dto);
@@ -170,20 +170,20 @@ class SendNotificationsRequestTest extends TestCase
     public function create_dto_from_response_throws_exception_when_body_cannot_be_decoded(): void
     {
         $request = new SendNotificationsRequest(
-            new PushMessageCollection()
+            new PushMessageCollection(),
         );
 
         $this->mockClient->addResponses([
             SendNotificationsRequest::class => MockResponse::make(
                 body: 'NOT VALID JSON',
-                headers: ['Content-Type' => 'application/json']
+                headers: ['Content-Type' => 'application/json'],
             ),
         ]);
 
         $this->expectException(UnexpectedValueException::class);
 
         $request->createDtoFromResponse(
-            $this->connector->send($request)
+            $this->connector->send($request),
         );
     }
 
@@ -199,12 +199,12 @@ class SendNotificationsRequestTest extends TestCase
 
             $messages[] = new PushMessage(
                 to: new PushToken("ExponentPushToken[$tokenValue]"),
-                title: "Test Notification $i"
+                title: "Test Notification $i",
             );
         }
 
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(...$messages)
+            new PushMessageCollection(...$messages),
         );
 
         $this->expectException(OverflowException::class);
@@ -220,18 +220,18 @@ class SendNotificationsRequestTest extends TestCase
         $messages = new PushMessageCollection(
             new PushMessage(
                 to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                title: 'Test Notification 1'
+                title: 'Test Notification 1',
             ),
             new PushMessage(
                 to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-                title: 'Test Notification 2'
+                title: 'Test Notification 2',
             ),
             new PushMessage(
                 to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 title: 'Test Notification 3',
                 data: [
                     'content' => $content,
-                ]
+                ],
             ),
         );
 

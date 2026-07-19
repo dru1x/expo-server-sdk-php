@@ -11,8 +11,12 @@ use JsonSerializable;
 
 final readonly class PushMessage implements JsonSerializable
 {
-    use ConvertsFromJson, ConvertsToJson;
+    use ConvertsFromJson;
+    use ConvertsToJson;
 
+    /**
+     * @param array<mixed>|object|null $data
+     */
     public function __construct(
         public PushTokenCollection|PushToken $to,
         public ?string                       $title = null,
@@ -33,9 +37,7 @@ final readonly class PushMessage implements JsonSerializable
         public ?string                       $tag = null,
         public ?bool                         $mutableContent = null,
         public ?bool                         $_contentAvailable = null,
-    )
-    {
-    }
+    ) {}
 
     // Helpers ----
 
@@ -62,7 +64,7 @@ final readonly class PushMessage implements JsonSerializable
             interruptionLevel: $this->interruptionLevel,
             channelId: $this->channelId,
             icon: $this->icon,
-            richContent: $this->richContent? clone $this->richContent : null,
+            richContent: $this->richContent ? clone $this->richContent : null,
             categoryId: $this->categoryId,
             collapseId: $this->collapseId,
             tag: $this->tag,
@@ -88,23 +90,30 @@ final readonly class PushMessage implements JsonSerializable
      */
     public function allTokens(): PushTokenCollection
     {
-        return $this->to instanceof PushTokenCollection ?
-            PushTokenCollection::fromIterable($this->to) :
-            PushTokenCollection::make($this->to);
+        return $this->to instanceof PushTokenCollection
+            ? PushTokenCollection::fromIterable($this->to)
+            : PushTokenCollection::make($this->to);
     }
 
     // Internals ----
 
-    /** @inheritDoc */
+    /**
+     * @inheritDoc
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         $allFields = get_object_vars($this);
 
-        $allFields['data'] = isset($allFields['data']) ? (object)$allFields['data'] : null;
+        $allFields['data'] = isset($allFields['data']) ? (object) $allFields['data'] : null;
 
         return array_filter($allFields, fn(mixed $value) => !is_null($value));
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     public static function fromArray(array $data): self
     {
         if (!isset($data['to']) || !is_array($data['to']) && !is_string($data['to'])) {

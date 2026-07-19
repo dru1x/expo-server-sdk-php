@@ -56,13 +56,13 @@ final class ExpoPushConnector extends Connector
 
         if (!$version) {
             $composer = json_decode(
-                file_get_contents(dirname(__DIR__) . '/composer.json')
+                file_get_contents(dirname(__DIR__) . '/composer.json'),
             );
 
             $version = InstalledVersions::getPrettyVersion($composer->name);
         }
 
-        return (string)$version;
+        return (string) $version;
     }
 
     // Internals ----

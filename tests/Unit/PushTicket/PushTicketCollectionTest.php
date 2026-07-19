@@ -46,19 +46,19 @@ class PushTicketCollectionTest extends TestCase
     {
         $collection = new PushTicketCollection();
 
-        $collection->set(9,
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            )
+        $setTicket = new SuccessfulPushTicket(
+            token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+            receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
         );
+
+        $collection->set(9, $setTicket);
 
         $this->assertCount(1, $collection);
         $this->assertNull($collection->get(0));
 
-        $pushTicket = $collection->get(9);
-        $this->assertInstanceOf(SuccessfulPushTicket::class, $pushTicket);
-        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $pushTicket->receiptId);
+        $getTicket = $collection->get(9);
+        $this->assertInstanceOf(SuccessfulPushTicket::class, $getTicket);
+        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $getTicket->receiptId);
     }
 
     #[Test]
@@ -71,18 +71,18 @@ class PushTicketCollectionTest extends TestCase
             ),
         );
 
-        $collection->set(0,
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-                receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-            ),
+        $setTicket = new SuccessfulPushTicket(
+            token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
+            receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
         );
+
+        $collection->set(0, $setTicket);
 
         $this->assertCount(1, $collection);
 
-        $pushTicket = $collection->get(0);
-        $this->assertInstanceOf(SuccessfulPushTicket::class, $pushTicket);
-        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $pushTicket->receiptId);
+        $getTicket = $collection->get(0);
+        $this->assertInstanceOf(SuccessfulPushTicket::class, $getTicket);
+        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $getTicket->receiptId);
     }
 
     #[Test]
@@ -324,7 +324,7 @@ class PushTicketCollectionTest extends TestCase
         );
 
         $filteredCollection = $collection->filter(
-            fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'
+            fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         );
 
         $this->assertCount(5, $filteredCollection);
@@ -362,7 +362,7 @@ class PushTicketCollectionTest extends TestCase
         );
 
         $collection->filter(
-            fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'
+            fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         );
 
         $this->assertCount(6, $collection);
@@ -435,24 +435,24 @@ class PushTicketCollectionTest extends TestCase
         );
 
         $expectedJson = <<<JSON
-[
-  {
-    "receiptId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-    "status": "ok",
-    "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-  },
-  {
-    "receiptId": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
-    "status": "ok",
-    "token": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]"
-  },
-  {
-    "receiptId": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
-    "status": "ok",
-    "token": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]"
-  }
-]
-JSON;
+            [
+              {
+                "receiptId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                "status": "ok",
+                "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+              },
+              {
+                "receiptId": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+                "status": "ok",
+                "token": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]"
+              },
+              {
+                "receiptId": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
+                "status": "ok",
+                "token": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]"
+              }
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, json_encode($collection));
     }
@@ -476,24 +476,24 @@ JSON;
         );
 
         $expectedJson = <<<JSON
-[
-  {
-    "receiptId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-    "status": "ok",
-    "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-  },
-  {
-    "receiptId": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
-    "status": "ok",
-    "token": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]"
-  },
-  {
-    "receiptId": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
-    "status": "ok",
-    "token": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]"
-  }
-]
-JSON;
+            [
+              {
+                "receiptId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                "status": "ok",
+                "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+              },
+              {
+                "receiptId": "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY",
+                "status": "ok",
+                "token": "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]"
+              },
+              {
+                "receiptId": "ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ",
+                "status": "ok",
+                "token": "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]"
+              }
+            ]
+            JSON;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $collection->toJson());
     }
@@ -526,7 +526,7 @@ JSON;
                         token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
                         receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB',
                     ),
-                ])
+                ]),
             );
 
         $this->assertEquals([
@@ -617,21 +617,21 @@ JSON;
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = new PushTicketCollection;
+        $empty = new PushTicketCollection();
 
         $notEmpty = new PushTicketCollection(
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
                 receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB',
-            )
+            ),
         );
 
         $this->assertTrue(
-            $empty->isEmpty()
+            $empty->isEmpty(),
         );
 
         $this->assertFalse(
-            $notEmpty->isEmpty()
+            $notEmpty->isEmpty(),
         );
     }
 
@@ -662,7 +662,7 @@ JSON;
         );
 
         $filteredCollection = $collection->reject(
-            fn(SuccessfulPushTicket $ticket) => $ticket->token->value === 'ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'
+            fn(SuccessfulPushTicket $ticket) => $ticket->token->value === 'ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]',
         );
 
         $this->assertCount(4, $filteredCollection);

@@ -30,11 +30,21 @@
     "saloonphp/rate-limit-plugin": "^2.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^11.5.5"
+    "friendsofphp/php-cs-fixer": "^3.95",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan": "^v2.2",
+    "phpstan/phpstan-phpunit": "^2.0",
+    "phpunit/phpunit": "^11.5"
   },
   "scripts": {
+    "format": "@php vendor/bin/php-cs-fixer fix --ansi",
+    "analyse": "@php vendor/bin/phpstan analyse --verbose --ansi",
+    "lint": [
+      "@format",
+      "@analyse"
+    ],
     "test": "vendor/bin/phpunit --testdox",
-    "test-coverage": "@test --coverage-html coverage"
+    "test-coverage": "@test --coverage-text coverage"
   },
   "autoload": {
     "psr-4": {
@@ -48,6 +58,9 @@
   },
   "minimum-stability": "stable",
   "config": {
-    "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "phpstan/extension-installer": true
+    }
   }
 }
