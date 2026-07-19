@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpUnhandledExceptionInspection */
+
 namespace Dru1x\ExpoPush\Tests\Unit;
 
 use Dru1x\ExpoPush\ExpoPushConnector;
@@ -46,8 +48,8 @@ class ExpoPushConnectorTest extends TestCase
         $connector = new ExpoPushConnector();
 
         $this->assertSame('gzip, deflate', $connector->headers()->get('Accept-Encoding'));
-        $this->assertStringStartsWith('expo-server-sdk-php/', (string)$connector->headers()->get('User-Agent'));
-        $this->assertStringContainsString('(dru1x)', (string)$connector->headers()->get('User-Agent'));
+        $this->assertStringStartsWith('expo-server-sdk-php/', (string) $connector->headers()->get('User-Agent'));
+        $this->assertStringContainsString('(dru1x)', (string) $connector->headers()->get('User-Agent'));
     }
 
     #[Test]
@@ -71,7 +73,7 @@ class ExpoPushConnectorTest extends TestCase
     }
 
     #[Test]
-    public function uses_a_memory_store_by_default(): void
+    public function default_rate_limit_store_is_memory_store_when_none_supplied(): void
     {
         $connector = new ExpoPushConnector();
 
@@ -79,10 +81,9 @@ class ExpoPushConnectorTest extends TestCase
     }
 
     #[Test]
-    public function uses_the_provided_rate_limit_store_when_given(): void
+    public function custom_rate_limit_store_is_used_when_supplied(): void
     {
-        $store = new MemoryStore();
-
+        $store     = new MemoryStore();
         $connector = new ExpoPushConnector(rateLimitStore: $store);
 
         $this->assertSame($store, $connector->rateLimitStore());

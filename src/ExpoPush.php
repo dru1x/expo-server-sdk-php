@@ -18,19 +18,20 @@ use Saloon\Exceptions\InvalidPoolItemException;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Pool;
 use Saloon\Http\Response;
+use Saloon\RateLimitPlugin\Contracts\RateLimitStore;
 
 class ExpoPush
 {
     protected ExpoPushConnector $connector;
 
-    public function __construct(?string $authToken = null)
+    public function __construct(?string $authToken = null, ?RateLimitStore $rateLimitStore = null)
     {
-        $this->connector = new ExpoPushConnector($authToken);
+        $this->connector = new ExpoPushConnector($authToken, $rateLimitStore);
     }
 
-    public static function withMockClient(MockClient $mockClient, ?string $authToken = null): self
+    public static function withMockClient(MockClient $mockClient, ?string $authToken = null, ?RateLimitStore $rateLimitStore = null): self
     {
-        $expoPush = new self($authToken);
+        $expoPush = new self($authToken, $rateLimitStore);
 
         $expoPush->connector->withMockClient($mockClient);
 
