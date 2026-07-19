@@ -8,6 +8,7 @@ use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
 use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
+use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Request\SendNotificationsRequest;
@@ -164,6 +165,42 @@ class SendNotificationsRequestTest extends TestCase
 
         $ticket3 = $dto->get(2);
         $this->assertInstanceOf(FailedPushTicket::class, $ticket3);
+    }
+
+    #[Test]
+    public function create_dto_from_response_maps_unrecognized_error_code_to_unknown(): void
+    {
+        $request = new SendNotificationsRequest(
+            new PushMessageCollection(
+                new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]')),
+            ),
+        );
+
+        $this->mockClient->addResponses([
+            SendNotificationsRequest::class => MockResponse::make(
+                body: [
+                    'data' => [
+                        [
+                            'status'  => 'error',
+                            'message' => '"ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]" is not a registered push notification recipient',
+                            'details' => [
+                                'error'         => 'SomeBrandNewErrorCode',
+                                'expoPushToken' => 'ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]',
+                            ],
+                        ],
+                    ],
+                ],
+                headers: ['Content-Type' => 'application/json'],
+            ),
+        ]);
+
+        $dto = $request->createDtoFromResponse(
+            $this->connector->send($request),
+        );
+
+        $ticket = $dto->get(0);
+        $this->assertInstanceOf(FailedPushTicket::class, $ticket);
+        $this->assertEquals(PushTicketErrorCode::Unknown, $ticket->details->error);
     }
 
     #[Test]

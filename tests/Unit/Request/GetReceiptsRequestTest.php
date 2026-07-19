@@ -5,6 +5,8 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Request;
 
 use Dru1x\ExpoPush\ExpoPushConnector;
+use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptErrorCode;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Request\GetReceiptsRequest;
 use OverflowException;
@@ -129,6 +131,40 @@ class GetReceiptsRequestTest extends TestCase
         $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $dto->get(0)->id);
         $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $dto->get(1)->id);
         $this->assertEquals('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', $dto->get(2)->id);
+    }
+
+    #[Test]
+    public function create_dto_from_response_maps_unrecognized_error_code_to_unknown(): void
+    {
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection(),
+        );
+
+        $this->mockClient->addResponses([
+            GetReceiptsRequest::class => MockResponse::make(
+                body: [
+                    'data' => [
+                        'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ' => [
+                            'status'  => 'error',
+                            'message' => '"ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]" is not a registered push notification recipient',
+                            'details' => [
+                                'error'         => 'SomeBrandNewErrorCode',
+                                'expoPushToken' => 'ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]',
+                            ],
+                        ],
+                    ],
+                ],
+                headers: ['Content-Type' => 'application/json'],
+            ),
+        ]);
+
+        $dto = $request->createDtoFromResponse(
+            $this->connector->send($request),
+        );
+
+        $receipt = $dto->get(0);
+        $this->assertInstanceOf(FailedPushReceipt::class, $receipt);
+        $this->assertEquals(PushReceiptErrorCode::Unknown, $receipt->details->error);
     }
 
     #[Test]
