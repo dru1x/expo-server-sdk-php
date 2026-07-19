@@ -137,7 +137,7 @@ class GetReceiptsRequestTest extends TestCase
     public function create_dto_from_response_maps_unrecognized_error_code_to_unknown(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection()
+            new PushReceiptIdCollection(),
         );
 
         $this->mockClient->addResponses([
@@ -154,12 +154,12 @@ class GetReceiptsRequestTest extends TestCase
                         ],
                     ],
                 ],
-                headers: ['Content-Type' => 'application/json']
+                headers: ['Content-Type' => 'application/json'],
             ),
         ]);
 
         $dto = $request->createDtoFromResponse(
-            $this->connector->send($request)
+            $this->connector->send($request),
         );
 
         $receipt = $dto->get(0);

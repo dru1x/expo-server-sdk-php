@@ -173,7 +173,7 @@ class SendNotificationsRequestTest extends TestCase
         $request = new SendNotificationsRequest(
             new PushMessageCollection(
                 new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]')),
-            )
+            ),
         );
 
         $this->mockClient->addResponses([
@@ -190,12 +190,12 @@ class SendNotificationsRequestTest extends TestCase
                         ],
                     ],
                 ],
-                headers: ['Content-Type' => 'application/json']
+                headers: ['Content-Type' => 'application/json'],
             ),
         ]);
 
         $dto = $request->createDtoFromResponse(
-            $this->connector->send($request)
+            $this->connector->send($request),
         );
 
         $ticket = $dto->get(0);

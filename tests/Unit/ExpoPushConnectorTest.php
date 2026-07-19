@@ -46,8 +46,8 @@ class ExpoPushConnectorTest extends TestCase
         $connector = new ExpoPushConnector();
 
         $this->assertSame('gzip, deflate', $connector->headers()->get('Accept-Encoding'));
-        $this->assertStringStartsWith('expo-server-sdk-php/', (string)$connector->headers()->get('User-Agent'));
-        $this->assertStringContainsString('(dru1x)', (string)$connector->headers()->get('User-Agent'));
+        $this->assertStringStartsWith('expo-server-sdk-php/', (string) $connector->headers()->get('User-Agent'));
+        $this->assertStringContainsString('(dru1x)', (string) $connector->headers()->get('User-Agent'));
     }
 
     #[Test]
