@@ -65,7 +65,7 @@ class ExpoPushConnectorTest extends TestCase
     {
         $connector = new ExpoPushConnector();
 
-        $limit = $this->findLimit($connector, 'expo-push-limit');
+        $limit = $this->findLimit($connector, 'push-limit');
 
         $this->assertSame(6, $limit->getAllow());
         $this->assertSame(1, $limit->getReleaseInSeconds());
@@ -95,7 +95,7 @@ class ExpoPushConnectorTest extends TestCase
     {
         try {
             foreach ($connector->getLimits() as $limit) {
-                if (str_ends_with($limit->getName(), ":{$name}")) {
+                if (str_ends_with($limit->getName(), ":$name")) {
                     return $limit;
                 }
             }

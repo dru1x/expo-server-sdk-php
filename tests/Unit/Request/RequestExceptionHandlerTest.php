@@ -13,6 +13,8 @@ use PHPUnit\Framework\TestCase;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
 use Saloon\Http\Response;
+use Saloon\RateLimitPlugin\Exceptions\RateLimitReachedException;
+use Saloon\RateLimitPlugin\Limit;
 
 class RequestExceptionHandlerTest extends TestCase
 {
@@ -41,6 +43,24 @@ class RequestExceptionHandlerTest extends TestCase
         $this->assertEquals(PushErrorCode::Failed, $error->code);
         $this->assertEquals(100, $error->startIndex);
         $this->assertEquals(199, $error->endIndex);
+    }
+
+    #[Test]
+    public function invoke_with_rate_limit_reached_exception_adds_push_error(): void
+    {
+        $limit = Limit::allow(100)->setPrefix('expo')->name('push-limit');
+        $rateLimitReachedException = new RateLimitReachedException($limit);
+
+        $handler = $this->handler;
+        $handler($rateLimitReachedException, 2);
+
+        $this->assertCount(1, $this->errors);
+
+        $error = $this->errors->get(0);
+        $this->assertEquals(PushErrorCode::TooManyRequests, $error->code);
+        $this->assertEquals('Request Rate Limit Reached (Name: expo:push-limit)', $error->message);
+        $this->assertEquals(200, $error->startIndex);
+        $this->assertEquals(299, $error->endIndex);
     }
 
     #[Test]
