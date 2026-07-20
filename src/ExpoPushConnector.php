@@ -34,7 +34,8 @@ final class ExpoPushConnector extends Connector
             Limit::allow(6)
                 ->everySeconds(1)
                 ->sleep()
-                ->name('expo-push-limit'),
+                ->setPrefix('expo')
+                ->name('push-limit'),
         ];
     }
 
