@@ -2,8 +2,13 @@
 
 namespace Dru1x\ExpoPush\PushError;
 
-final readonly class PushError
+use Dru1x\ExpoPush\Support\ConvertsToJson;
+use JsonSerializable;
+
+final readonly class PushError implements JsonSerializable
 {
+    use ConvertsToJson;
+
     /**
      * @param ?array<string, mixed> $details
      */
