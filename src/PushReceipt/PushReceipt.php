@@ -38,6 +38,7 @@ abstract readonly class PushReceipt implements JsonSerializable
     {
         return array_filter(
             get_object_vars($this),
+            fn(mixed $value): bool => !is_null($value),
         );
     }
 }
