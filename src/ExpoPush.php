@@ -28,7 +28,7 @@ class ExpoPush
     public function __construct(
         ?string $authToken = null,
         ?RateLimitStore $rateLimitStore = null,
-        ?RetryConfig $retryConfig = null,
+        ?RetryConfig $retryConfig = new RetryConfig(),
     ) {
         $this->connector = new ExpoPushConnector($authToken, $rateLimitStore, $retryConfig);
     }

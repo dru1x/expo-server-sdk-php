@@ -91,24 +91,26 @@ class ExpoPushConnectorTest extends TestCase
     }
 
     #[Test]
-    public function retries_are_disabled_by_default(): void
+    public function retry_configuration_defaults_to_three_tries_with_500ms_exponential_backoff(): void
     {
         $connector = new ExpoPushConnector();
 
-        $this->assertNull($connector->tries);
-        $this->assertNull($connector->retryInterval);
-        $this->assertNull($connector->useExponentialBackoff);
+        $this->assertSame(3, $connector->tries);
+        $this->assertSame(500, $connector->retryInterval);
+        $this->assertTrue($connector->useExponentialBackoff);
+        $this->assertTrue($connector->throwOnMaxTries);
     }
 
     #[Test]
     public function custom_retry_configuration_is_used_when_supplied(): void
     {
-        $retryConfig = new RetryConfig(tries: 3, retryInterval: 500, useExponentialBackoff: true);
+        $retryConfig = new RetryConfig(tries: 5, retryInterval: 1000, useExponentialBackoff: false, throwOnMaxTries: false);
         $connector = new ExpoPushConnector(retryConfig: $retryConfig);
 
-        $this->assertSame(3, $connector->tries);
-        $this->assertSame(500, $connector->retryInterval);
-        $this->assertTrue($connector->useExponentialBackoff);
+        $this->assertSame(5, $connector->tries);
+        $this->assertSame(1000, $connector->retryInterval);
+        $this->assertFalse($connector->useExponentialBackoff);
+        $this->assertFalse($connector->throwOnMaxTries);
     }
 
     // Internals ----

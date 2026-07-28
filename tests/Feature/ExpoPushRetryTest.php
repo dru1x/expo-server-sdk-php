@@ -132,18 +132,24 @@ class ExpoPushRetryTest extends TestCase
     }
 
     #[Test]
-    public function a_5xx_failure_is_not_retried_when_no_retry_configuration_is_supplied(): void
+    public function a_5xx_failure_is_retried_up_to_three_times_by_default_when_no_retry_configuration_is_supplied(): void
     {
         $service = new ExpoPush();
         $service->withMockClient($this->mockClient);
 
-        $this->mockClient->addResponse(MockResponse::make(status: 500));
+        $this->mockClient->addResponses([
+            MockResponse::make(status: 500),
+            MockResponse::make(status: 500),
+            MockResponse::make(status: 500),
+        ]);
 
         $result = $service->sendNotification($this->makeMessage());
 
-        $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
+        $this->mockClient->assertSentCount(3, SendNotificationsRequest::class);
 
         $this->assertTrue($result->hasErrors());
+        $this->assertCount(1, $result->errors);
+        $this->assertEquals(PushErrorCode::Failed, $result->errors->get(0)->code);
     }
 
     #[Test]

@@ -27,10 +27,10 @@ trait RetriesRequests
         // Send off the request asynchronously and register a rejection handler
         return parent::sendAsync($request, $mockClient)->otherwise(function (FatalRequestException|RequestException $exception) use ($request, $mockClient, $handleRetry, $attempts) {
 
-            $maxTries = $request->tries ?? $this->tries ?? 1;
-            $retryInterval = $request->retryInterval ?? $this->retryInterval ?? 0;
-            $throwOnMaxTries = $request->throwOnMaxTries ?? $this->throwOnMaxTries ?? true;
-            $useExponentialBackoff = $request->useExponentialBackoff ?? $this->useExponentialBackoff ?? false;
+            $maxTries = $request->tries ?? $this->tries;
+            $retryInterval = $request->retryInterval ?? $this->retryInterval;
+            $throwOnMaxTries = $request->throwOnMaxTries ?? $this->throwOnMaxTries;
+            $useExponentialBackoff = $request->useExponentialBackoff ?? $this->useExponentialBackoff;
 
             // Ensure that max tries is 1 or greater, and retry interval is 0 or greater
             $maxTries = max($maxTries, 1);

@@ -28,14 +28,14 @@ class ExpoPushConnector extends Connector
     public function __construct(
         protected ?string $authToken = null,
         ?RateLimitStore   $rateLimitStore = null,
-        ?RetryConfig      $retryConfig = null,
+        RetryConfig       $retryConfig = new RetryConfig(),
     ) {
         $this->rateLimitStore = $rateLimitStore;
 
-        $this->tries = $retryConfig?->tries;
-        $this->retryInterval = $retryConfig?->retryInterval;
-        $this->useExponentialBackoff = $retryConfig?->useExponentialBackoff;
-        $this->throwOnMaxTries = $retryConfig?->throwOnMaxTries;
+        $this->tries = $retryConfig->tries;
+        $this->retryInterval = $retryConfig->retryInterval;
+        $this->useExponentialBackoff = $retryConfig->useExponentialBackoff;
+        $this->throwOnMaxTries = $retryConfig->throwOnMaxTries;
     }
 
     public function resolveBaseUrl(): string
