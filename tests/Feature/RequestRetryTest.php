@@ -20,7 +20,7 @@ use Saloon\Http\Faking\MockResponse;
 use Saloon\Http\PendingRequest;
 use Saloon\Http\Request;
 
-class ExpoPushRetryTest extends TestCase
+class RequestRetryTest extends TestCase
 {
     protected MockClient $mockClient;
 
@@ -36,7 +36,7 @@ class ExpoPushRetryTest extends TestCase
     }
 
     #[Test]
-    public function a_transient_5xx_failure_is_retried_and_eventually_succeeds(): void
+    public function transient_server_failures_are_retried_and_eventually_succeed(): void
     {
         $retryConfig = new RetryConfig(tries: 2, retryInterval: 1);
 
@@ -60,7 +60,7 @@ class ExpoPushRetryTest extends TestCase
     }
 
     #[Test]
-    public function a_fatal_connection_error_is_retried_and_eventually_succeeds(): void
+    public function fatal_connection_errors_are_retried_and_eventually_succeed(): void
     {
         $retryConfig = new RetryConfig(tries: 2, retryInterval: 1);
 
@@ -132,7 +132,7 @@ class ExpoPushRetryTest extends TestCase
     }
 
     #[Test]
-    public function a_5xx_failure_is_retried_up_to_three_times_by_default_when_no_retry_configuration_is_supplied(): void
+    public function server_failures_are_retried_up_to_three_times_by_default(): void
     {
         $service = new ExpoPush();
         $service->withMockClient($this->mockClient);
