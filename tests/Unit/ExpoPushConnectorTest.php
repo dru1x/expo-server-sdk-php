@@ -4,6 +4,7 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit;
 
+use Dru1x\ExpoPush\Config\RetryConfig;
 use Dru1x\ExpoPush\ExpoPushConnector;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -87,6 +88,27 @@ class ExpoPushConnectorTest extends TestCase
         $connector = new ExpoPushConnector(rateLimitStore: $store);
 
         $this->assertSame($store, $connector->rateLimitStore());
+    }
+
+    #[Test]
+    public function retries_are_disabled_by_default(): void
+    {
+        $connector = new ExpoPushConnector();
+
+        $this->assertNull($connector->tries);
+        $this->assertNull($connector->retryInterval);
+        $this->assertNull($connector->useExponentialBackoff);
+    }
+
+    #[Test]
+    public function custom_retry_configuration_is_used_when_supplied(): void
+    {
+        $retryConfig = new RetryConfig(tries: 3, retryInterval: 500, useExponentialBackoff: true);
+        $connector = new ExpoPushConnector(retryConfig: $retryConfig);
+
+        $this->assertSame(3, $connector->tries);
+        $this->assertSame(500, $connector->retryInterval);
+        $this->assertTrue($connector->useExponentialBackoff);
     }
 
     // Internals ----

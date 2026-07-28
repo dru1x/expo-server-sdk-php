@@ -39,6 +39,33 @@ $accessToken = 'NTLyMHB2vtZ1lWhgP0sjWJTOCed9zspT';
 $expoPush    = new ExpoPush($accessToken);
 ```
 
+### Retrying Transient Failures
+
+By default, a request that fails due to a network issue (e.g. a timeout or connection error) or
+a `5xx` server error is not retried. To have such transient failures retried automatically,
+supply a `RetryConfig` to the constructor:
+
+```php
+use Dru1x\ExpoPush\ExpoPush;
+use Dru1x\ExpoPush\Config\RetryConfig;
+
+$expoPush = new ExpoPush(retryConfig: new RetryConfig(
+    tries: 3,
+    retryInterval: 500,
+    useExponentialBackoff: true,
+));
+```
+
+- `tries` — the maximum number of attempts to make for a single request.
+- `retryInterval` — the base delay between retries, in milliseconds.
+- `useExponentialBackoff` — whether the delay should double after each attempt.
+- `throwOnMaxTries` — whether an exception should be thrown once retries are exhausted
+  (defaults to `true`); if set to `false`, the last error response is returned instead.
+
+Client errors (e.g. `4xx` responses) are never retried, since retrying is unlikely to change the
+outcome. If all retries are exhausted, the failure is recorded as a `PushError`, the same as if
+retries were never configured.
+
 ### Sending Push Notifications
 
 Push notifications can be sent by supplying a `PushMessageCollection`, or an array of `PushMessage` objects, to the

@@ -36,7 +36,9 @@ class ExpoPushTest extends TestCase
         MockClient::destroyGlobal();
 
         $this->mockClient = new MockClient();
-        $this->service    = ExpoPush::withMockClient($this->mockClient);
+        $this->service    = new ExpoPush();
+
+        $this->service->withMockClient($this->mockClient);
 
         Config::preventStrayRequests();
     }

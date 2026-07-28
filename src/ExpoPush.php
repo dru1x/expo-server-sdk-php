@@ -2,6 +2,7 @@
 
 namespace Dru1x\ExpoPush;
 
+use Dru1x\ExpoPush\Config\RetryConfig;
 use Dru1x\ExpoPush\PushError\PushErrorCollection;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
@@ -24,18 +25,12 @@ class ExpoPush
 {
     protected ExpoPushConnector $connector;
 
-    public function __construct(?string $authToken = null, ?RateLimitStore $rateLimitStore = null)
-    {
-        $this->connector = new ExpoPushConnector($authToken, $rateLimitStore);
-    }
-
-    public static function withMockClient(MockClient $mockClient, ?string $authToken = null, ?RateLimitStore $rateLimitStore = null): self
-    {
-        $expoPush = new self($authToken, $rateLimitStore);
-
-        $expoPush->connector->withMockClient($mockClient);
-
-        return $expoPush;
+    public function __construct(
+        ?string $authToken = null,
+        ?RateLimitStore $rateLimitStore = null,
+        ?RetryConfig $retryConfig = null,
+    ) {
+        $this->connector = new ExpoPushConnector($authToken, $rateLimitStore, $retryConfig);
     }
 
     // Interface ----
@@ -166,6 +161,21 @@ class ExpoPush
     }
 
     // Internals ----
+
+    /**
+     * Use a mock client instead of a real one.
+     *
+     * This should only be used for testing.
+     *
+     * @internal
+     * @return $this
+     */
+    public function withMockClient(MockClient $mockClient): self
+    {
+        $this->connector = $this->connector->withMockClient($mockClient);
+
+        return $this;
+    }
 
     /**
      * Make a request pool with a concurrency limit and error handler

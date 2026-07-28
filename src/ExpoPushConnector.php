@@ -3,27 +3,57 @@
 namespace Dru1x\ExpoPush;
 
 use Composer\InstalledVersions;
+use Dru1x\ExpoPush\Config\RetryConfig;
+use Dru1x\ExpoPush\Support\RetriesRequests;
+use GuzzleHttp\Promise\PromiseInterface;
+use Saloon\Exceptions\Request\FatalRequestException;
+use Saloon\Exceptions\Request\RequestException;
 use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\Connector;
+use Saloon\Http\Faking\MockClient;
+use Saloon\Http\Request;
 use Saloon\RateLimitPlugin\Contracts\RateLimitStore;
 use Saloon\RateLimitPlugin\Limit;
 use Saloon\RateLimitPlugin\Stores\MemoryStore;
 use Saloon\RateLimitPlugin\Traits\HasRateLimits;
+use Throwable;
 
-final class ExpoPushConnector extends Connector
+class ExpoPushConnector extends Connector
 {
     use HasRateLimits;
+    use RetriesRequests;
 
     public const MAX_CONCURRENT_REQUESTS = 6;
 
-    public function __construct(protected ?string $authToken = null, ?RateLimitStore $rateLimitStore = null)
-    {
+    public function __construct(
+        protected ?string $authToken = null,
+        ?RateLimitStore   $rateLimitStore = null,
+        ?RetryConfig      $retryConfig = null,
+    ) {
         $this->rateLimitStore = $rateLimitStore;
+
+        $this->tries = $retryConfig?->tries;
+        $this->retryInterval = $retryConfig?->retryInterval;
+        $this->useExponentialBackoff = $retryConfig?->useExponentialBackoff;
+        $this->throwOnMaxTries = $retryConfig?->throwOnMaxTries;
     }
 
     public function resolveBaseUrl(): string
     {
         return 'https://exp.host/--/api/v2/push';
+    }
+
+    // Sending ----
+
+    /**
+     * Send a request asynchronously, retrying in the event of transient failures.
+     *
+     * @param callable(Throwable, Request): (bool)|null $handleRetry
+     * @throws FatalRequestException|RequestException
+     */
+    public function sendAsync(Request $request, ?MockClient $mockClient = null, ?callable $handleRetry = null): PromiseInterface
+    {
+        return $this->sendAsyncWithRetries($request, $mockClient, $handleRetry);
     }
 
     // Rate Limits ----
@@ -73,7 +103,7 @@ final class ExpoPushConnector extends Connector
     {
         return [
             'Accept-Encoding' => 'gzip, deflate',
-            'User-Agent'      => "expo-server-sdk-php/{$this->sdkVersion()} (dru1x)",
+            'User-Agent' => "expo-server-sdk-php/{$this->sdkVersion()} (dru1x)",
         ];
     }
 
