@@ -5,10 +5,17 @@ namespace Dru1x\ExpoPush\Support;
 use GuzzleHttp\Promise\PromiseInterface;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
+use Saloon\Http\Connector;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Request;
 use Throwable;
 
+/**
+ * This adds a retry capability to asynchronous requests sent through a Saloon connector.
+ *
+ * @see Connector::send()
+ * @see https://github.com/saloonphp/saloon/pull/323
+ */
 trait RetriesRequests
 {
     /**
