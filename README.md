@@ -71,6 +71,12 @@ To disable retries entirely, set `tries` to `1`:
 $expoPush = new ExpoPush(retryConfig: new RetryConfig(tries: 1));
 ```
 
+This can also be achieved using the `disabled()` helper:
+
+```php
+$expoPush = new ExpoPush(retryConfig: RetryConfig::disabled());
+```
+
 Client errors (e.g. `4xx` responses) are never retried, since retrying is unlikely to change the
 outcome. If all retries are exhausted, the failure is recorded as a `PushError`.
 
