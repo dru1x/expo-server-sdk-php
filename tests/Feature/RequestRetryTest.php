@@ -10,15 +10,21 @@ use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Request\SendNotificationsRequest;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Saloon\Config;
+use Saloon\Contracts\Sender;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Saloon\Http\PendingRequest;
 use Saloon\Http\Request;
+use Saloon\Http\Senders\GuzzleSender;
 
 class RequestRetryTest extends TestCase
 {
@@ -186,10 +192,76 @@ class RequestRetryTest extends TestCase
         $this->assertSame(1, $connector->handleRetryCalls);
     }
 
+    #[Test]
+    public function retries_carry_the_computed_delay_as_a_guzzle_request_option(): void
+    {
+        // This test sends through a mocked Guzzle handler rather than a Saloon MockClient, so
+        // undo the stray-request prevention enabled in setUp() for the duration of this test
+        Config::allowStrayRequests();
+
+        $recordingSender = new RecordingSender([
+            new GuzzleResponse(status: 500),
+            new GuzzleResponse(status: 500),
+            new GuzzleResponse(
+                status: 200,
+                headers: ['Content-Type' => 'application/json'],
+                body: json_encode(['data' => [['status' => 'ok', 'id' => 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX']]]),
+            ),
+        ]);
+
+        $retryConfig = new RetryConfig(tries: 3, retryInterval: 2, useExponentialBackoff: true);
+
+        $connector = new class ($recordingSender, retryConfig: $retryConfig) extends ExpoPushConnector {
+            public function __construct(protected Sender $testSender, RetryConfig $retryConfig)
+            {
+                parent::__construct(retryConfig: $retryConfig);
+            }
+
+            public function sender(): Sender
+            {
+                return $this->testSender;
+            }
+        };
+
+        $request = new SendNotificationsRequest(new PushMessageCollection($this->makeMessage()));
+
+        $connector->sendAsync($request)->wait();
+
+        // Attempt 1 is sent with no delay; attempts 2 and 3 carry the exponentially-increasing backoff
+        $this->assertSame([null, 2, 4], $recordingSender->recordedDelays);
+    }
+
     // Helpers ----
 
     protected function makeMessage(): PushMessage
     {
         return new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification');
+    }
+}
+
+// Helper Classes ----
+
+class RecordingSender extends GuzzleSender
+{
+    public array $recordedDelays = [];
+
+    /**
+     * @param array<int, GuzzleResponse> $mockResponses
+     */
+    public function __construct(protected array $mockResponses)
+    {
+        parent::__construct();
+    }
+
+    protected function defaultHandlerStack(): HandlerStack
+    {
+        return HandlerStack::create(new MockHandler($this->mockResponses));
+    }
+
+    public function sendAsync(PendingRequest $pendingRequest): PromiseInterface
+    {
+        $this->recordedDelays[] = $pendingRequest->config()->get('delay');
+
+        return parent::sendAsync($pendingRequest);
     }
 }
