@@ -39,6 +39,47 @@ $accessToken = 'NTLyMHB2vtZ1lWhgP0sjWJTOCed9zspT';
 $expoPush    = new ExpoPush($accessToken);
 ```
 
+### Retrying Transient Failures
+
+By default, a request that fails due to a network issue (e.g. a timeout or connection error) or
+a `5xx` server error is automatically retried up to 3 times, with a 500ms base delay between
+attempts that doubles after each retry (exponential backoff). If all retries are exhausted, the
+original exception is thrown.
+
+This behaviour can be customised by supplying a `RetryConfig` to the constructor:
+
+```php
+use Dru1x\ExpoPush\ExpoPush;
+use Dru1x\ExpoPush\Config\RetryConfig;
+
+$expoPush = new ExpoPush(retryConfig: new RetryConfig(
+    tries: 5,
+    retryInterval: 1000,
+    useExponentialBackoff: false,
+));
+```
+
+- `tries` — the maximum number of attempts to make for a single request (defaults to `3`).
+- `retryInterval` — the base delay between retries, in milliseconds (defaults to `500`).
+- `useExponentialBackoff` — whether the delay should double after each attempt (defaults to `true`).
+- `throwOnMaxTries` — whether an exception should be thrown once retries are exhausted
+  (defaults to `true`); if set to `false`, the last error response is returned instead.
+
+To disable retries entirely, set `tries` to `1`:
+
+```php
+$expoPush = new ExpoPush(retryConfig: new RetryConfig(tries: 1));
+```
+
+This can also be achieved using the `disabled()` helper:
+
+```php
+$expoPush = new ExpoPush(retryConfig: RetryConfig::disabled());
+```
+
+Client errors (e.g. `4xx` responses) are never retried, since retrying is unlikely to change the
+outcome. If all retries are exhausted, the failure is recorded as a `PushError`.
+
 ### Sending Push Notifications
 
 Push notifications can be sent by supplying a `PushMessageCollection`, or an array of `PushMessage` objects, to the

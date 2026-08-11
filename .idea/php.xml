@@ -16,6 +16,8 @@
     <option name="transferred" value="true" />
   </component>
   <component name="PHPCSFixerOptionsConfiguration">
+    <option name="codingStandard" value="PER-CS" />
+    <option name="runMode" value="ON_SAVE" />
     <option name="transferred" value="true" />
   </component>
   <component name="PHPCodeSnifferOptionsConfiguration">
@@ -24,8 +26,8 @@
   </component>
   <component name="PhpCSFixer">
     <phpcsfixer_settings>
-      <phpcs_fixer_by_interpreter asDefaultInterpreter="true" interpreter_id="9db0917e-8e1b-4c10-a143-c57b1d0073fe" timeout="30000" />
-      <PhpCSFixerConfiguration tool_path="$PROJECT_DIR$/vendor/bin/php-cs-fixer" />
+      <phpcs_fixer_by_interpreter asDefaultInterpreter="true" deletedFromTheList="true" interpreter_id="9db0917e-8e1b-4c10-a143-c57b1d0073fe" standards="DoctrineAnnotation;PER;PER-CS;PER-CS1.0;PER-CS1x0;PER-CS2.0;PER-CS2x0;PER-CS3.0;PER-CS3x0;PHP54Migration;PHP56Migration;PHP5x4Migration;PHP5x6Migration;PHP70Migration;PHP71Migration;PHP73Migration;PHP74Migration;PHP7x0Migration;PHP7x1Migration;PHP7x3Migration;PHP7x4Migration;PHP80Migration;PHP81Migration;PHP82Migration;PHP83Migration;PHP84Migration;PHP85Migration;PHP8x0Migration;PHP8x1Migration;PHP8x2Migration;PHP8x3Migration;PHP8x4Migration;PHP8x5Migration;PHPUnit100Migration;PHPUnit10x0Migration;PHPUnit11x0Migration;PHPUnit30Migration;PHPUnit32Migration;PHPUnit35Migration;PHPUnit3x0Migration;PHPUnit3x2Migration;PHPUnit3x5Migration;PHPUnit43Migration;PHPUnit48Migration;PHPUnit4x3Migration;PHPUnit4x8Migration;PHPUnit50Migration;PHPUnit52Migration;PHPUnit54Migration;PHPUnit55Migration;PHPUnit56Migration;PHPUnit57Migration;PHPUnit5x0Migration;PHPUnit5x2Migration;PHPUnit5x4Migration;PHPUnit5x5Migration;PHPUnit5x6Migration;PHPUnit5x7Migration;PHPUnit60Migration;PHPUnit6x0Migration;PHPUnit75Migration;PHPUnit7x5Migration;PHPUnit84Migration;PHPUnit8x4Migration;PHPUnit91Migration;PHPUnit9x1Migration;PSR1;PSR12;PSR2;PhpCsFixer;Symfony;auto;autoPHPMigration;autoPHPUnitMigration" tool_path="/opt/project/vendor/bin/php-cs-fixer" timeout="30000" />
+      <PhpCSFixerConfiguration deletedFromTheList="true" tool_path="$PROJECT_DIR$/vendor/bin/php-cs-fixer" />
     </phpcsfixer_settings>
   </component>
   <component name="PhpCodeSniffer">
@@ -108,6 +110,7 @@
       <path value="$PROJECT_DIR$/vendor/evenement/evenement" />
       <path value="$PROJECT_DIR$/vendor/ergebnis/agent-detector" />
       <path value="$PROJECT_DIR$/vendor/clue/ndjson-react" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php85" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
@@ -168,7 +171,6 @@
       </interpreter>
     </phpInfoCache>
   </component>
-  <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
   <component name="PhpStan">
     <PhpStan_settings>
       <phpstan_by_interpreter asDefaultInterpreter="true" interpreter_id="9db0917e-8e1b-4c10-a143-c57b1d0073fe" timeout="60000" />

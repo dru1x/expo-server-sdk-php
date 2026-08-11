@@ -331,6 +331,8 @@ class CollectionTest extends TestCase
     }
 }
 
+// Helper Classes ----
+
 class Collection implements CollectionInterface
 {
     use CollectionMethods;
