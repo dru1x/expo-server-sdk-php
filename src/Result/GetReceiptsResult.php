@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dru1x\ExpoPush\Result;
 
 use Dru1x\ExpoPush\PushError\PushErrorCollection;

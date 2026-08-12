@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dru1x\ExpoPush\Request;
 
 use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
