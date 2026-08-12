@@ -27,6 +27,14 @@ class ExpoPush
 {
     protected ExpoPushConnector $connector;
 
+    /**
+     * @param string|null        $authToken An access token for Expo's additional security feature, if enabled
+     * @param RateLimitStore|null $rateLimitStore Where rate-limit state is tracked; defaults to an in-memory store
+     *                                             scoped to this process. Supply a shared store (e.g. Redis) if
+     *                                             sending from multiple processes concurrently.
+     * @param RetryConfig|null   $retryConfig How transient request failures should be retried; defaults to 3 tries
+     *                                        with exponential backoff
+     */
     public function __construct(
         ?string $authToken = null,
         ?RateLimitStore $rateLimitStore = null,
@@ -170,6 +178,7 @@ class ExpoPush
      * This should only be used for testing.
      *
      * @internal
+     * @param MockClient $mockClient
      * @return $this
      */
     public function withMockClient(MockClient $mockClient): self

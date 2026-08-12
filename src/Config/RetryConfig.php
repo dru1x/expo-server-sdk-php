@@ -6,6 +6,13 @@ namespace Dru1x\ExpoPush\Config;
 
 readonly class RetryConfig
 {
+    /**
+     * @param int  $tries The maximum number of attempts to make for a single request
+     * @param int  $retryInterval The base delay between retries, in milliseconds
+     * @param bool $useExponentialBackoff Whether the delay should double after each attempt
+     * @param bool $throwOnMaxTries Whether an exception should be thrown once retries are exhausted; if `false`,
+     *                              the last error response is returned instead
+     */
     public function __construct(
         public int  $tries = 3,
         public int  $retryInterval = 500,

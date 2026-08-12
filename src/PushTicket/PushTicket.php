@@ -13,6 +13,10 @@ abstract readonly class PushTicket implements JsonSerializable
 {
     use ConvertsToJson;
 
+    /**
+     * @param PushToken  $token The token this ticket was returned for
+     * @param PushStatus $status Whether Expo accepted this notification for delivery
+     */
     public function __construct(
         public PushToken  $token,
         public PushStatus $status,
@@ -20,11 +24,17 @@ abstract readonly class PushTicket implements JsonSerializable
 
     // Helpers ----
 
+    /**
+     * Whether this ticket was returned with a status of "ok"
+     */
     public function isSuccessful(): bool
     {
         return $this->status === PushStatus::Ok;
     }
 
+    /**
+     * Whether this ticket was returned with a status of "error"
+     */
     public function isFailed(): bool
     {
         return $this->status === PushStatus::Error;

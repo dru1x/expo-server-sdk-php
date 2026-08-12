@@ -10,16 +10,26 @@ use Dru1x\ExpoPush\Support\Result;
 
 final readonly class SendNotificationsResult extends Result
 {
+    /**
+     * @param PushTicketCollection $tickets The resulting tickets, ordered to match the sent push messages
+     * @param PushErrorCollection  $errors Any request-level errors encountered while sending
+     */
     public function __construct(public PushTicketCollection $tickets, PushErrorCollection $errors)
     {
         parent::__construct($errors);
     }
 
+    /**
+     * Whether any tickets were returned
+     */
     public function hasTickets(): bool
     {
         return $this->tickets->count() > 0;
     }
 
+    /**
+     * Whether at least one ticket was successful
+     */
     public function hasSuccessfulTickets(): bool
     {
         foreach ($this->tickets as $ticket) {
@@ -31,6 +41,9 @@ final readonly class SendNotificationsResult extends Result
         return false;
     }
 
+    /**
+     * Whether at least one ticket failed
+     */
     public function hasFailedTickets(): bool
     {
         foreach ($this->tickets as $ticket) {

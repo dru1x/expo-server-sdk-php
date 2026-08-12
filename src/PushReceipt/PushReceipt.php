@@ -12,6 +12,10 @@ abstract readonly class PushReceipt implements JsonSerializable
 {
     use ConvertsToJson;
 
+    /**
+     * @param string     $id The receipt ID this receipt was returned for
+     * @param PushStatus $status Whether the notification was delivered successfully
+     */
     public function __construct(
         public string     $id,
         public PushStatus $status,
@@ -19,11 +23,17 @@ abstract readonly class PushReceipt implements JsonSerializable
 
     // Helpers ----
 
+    /**
+     * Whether this receipt was returned with a status of "ok"
+     */
     public function isSuccessful(): bool
     {
         return $this->status === PushStatus::Ok;
     }
 
+    /**
+     * Whether this receipt was returned with a status of "error"
+     */
     public function isFailed(): bool
     {
         return $this->status === PushStatus::Error;

@@ -16,6 +16,9 @@ final readonly class PushToken implements JsonSerializable, Stringable
     use ConvertsFromJson;
     use ConvertsToJson;
 
+    /**
+     * @throws InvalidArgumentException If the given value is not a valid push token
+     */
     public function __construct(public string $value)
     {
         if (! $this->isValidTokenValue($value)) {
@@ -25,11 +28,19 @@ final readonly class PushToken implements JsonSerializable, Stringable
 
     // Helpers ----
 
+    /**
+     * Get the underlying token value as a string
+     */
     public function toString(): string
     {
         return $this->value;
     }
 
+    /**
+     * Create a PushToken from a string
+     *
+     * @throws InvalidArgumentException If the given value is not a valid push token
+     */
     public static function fromString(string $value): self
     {
         return new self($value);

@@ -48,6 +48,7 @@ final class PushMessageCollection implements Collection
      * @param int $size
      *
      * @return array<self>
+     * @throws ValueError If the given size is less than 1
      */
     public function chunkByNotifications(int $size): array
     {
