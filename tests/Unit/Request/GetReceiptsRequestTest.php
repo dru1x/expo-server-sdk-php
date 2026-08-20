@@ -10,6 +10,7 @@ use Dru1x\ExpoPush\PushReceipt\PushReceiptErrorCode;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Request\GetReceiptsRequest;
 use OverflowException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Saloon\Config;
@@ -165,6 +166,52 @@ class GetReceiptsRequestTest extends TestCase
         $receipt = $dto->get(0);
         $this->assertInstanceOf(FailedPushReceipt::class, $receipt);
         $this->assertEquals(PushReceiptErrorCode::Unknown, $receipt->details->error);
+    }
+
+    #[Test]
+    #[DataProvider('knownErrorCodeProvider')]
+    public function create_dto_from_response_maps_known_error_code(string $expoErrorString, PushReceiptErrorCode $expectedCode): void
+    {
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection(),
+        );
+
+        $this->mockClient->addResponses([
+            GetReceiptsRequest::class => MockResponse::make(
+                body: [
+                    'data' => [
+                        'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ' => [
+                            'status'  => 'error',
+                            'message' => '"ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]" is not a registered push notification recipient',
+                            'details' => [
+                                'error'         => $expoErrorString,
+                                'expoPushToken' => 'ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]',
+                            ],
+                        ],
+                    ],
+                ],
+                headers: ['Content-Type' => 'application/json'],
+            ),
+        ]);
+
+        $dto = $request->createDtoFromResponse(
+            $this->connector->send($request),
+        );
+
+        $receipt = $dto->get(0);
+        $this->assertInstanceOf(FailedPushReceipt::class, $receipt);
+        $this->assertEquals($expectedCode, $receipt->details->error);
+    }
+
+    public static function knownErrorCodeProvider(): array
+    {
+        return [
+            'DeviceNotRegistered' => ['DeviceNotRegistered', PushReceiptErrorCode::DeviceNotRegistered],
+            'InvalidCredentials'  => ['InvalidCredentials', PushReceiptErrorCode::InvalidCredentials],
+            'MessageRateExceeded' => ['MessageRateExceeded', PushReceiptErrorCode::MessageRateExceeded],
+            'MessageTooBig'       => ['MessageTooBig', PushReceiptErrorCode::MessageTooBig],
+            'MismatchSenderId'    => ['MismatchSenderId', PushReceiptErrorCode::MismatchSenderId],
+        ];
     }
 
     #[Test]
