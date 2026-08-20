@@ -5,6 +5,7 @@ namespace Dru1x\ExpoPush\Tests\Unit\PushToken;
 use ArrayIterator;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Traversable;
@@ -129,6 +130,102 @@ class PushTokenCollectionTest extends TestCase
         );
 
         $this->assertCount(3, $collection);
+    }
+
+    #[Test]
+    public function shift_with_negative_count_throws_exception(): void
+    {
+        $collection = new PushTokenCollection(
+            new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $collection->shift(-1);
+    }
+
+    #[Test]
+    public function shift_with_zero_count_returns_empty_collection_without_mutating_source(): void
+    {
+        $token1 = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+        $token2 = new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]');
+        $token3 = new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]');
+
+        $collection = new PushTokenCollection($token1, $token2, $token3);
+
+        $shifted = $collection->shift(0);
+
+        $this->assertTrue($shifted->isEmpty());
+
+        $this->assertCount(3, $collection);
+        $this->assertEquals($token1, $collection->get(0));
+        $this->assertEquals($token2, $collection->get(1));
+        $this->assertEquals($token3, $collection->get(2));
+    }
+
+    #[Test]
+    public function shift_from_empty_collection_returns_empty_collection(): void
+    {
+        $collection = new PushTokenCollection();
+
+        $shifted = $collection->shift();
+
+        $this->assertTrue($shifted->isEmpty());
+    }
+
+    #[Test]
+    public function shift_with_count_greater_than_available_returns_all_items(): void
+    {
+        $token1 = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+        $token2 = new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]');
+
+        $collection = new PushTokenCollection($token1, $token2);
+
+        $shifted = $collection->shift(5);
+
+        $this->assertCount(2, $shifted);
+        $this->assertEquals($token1, $shifted->get(0));
+        $this->assertEquals($token2, $shifted->get(1));
+
+        $this->assertTrue($collection->isEmpty());
+    }
+
+    #[Test]
+    public function shift_removes_and_returns_leading_items_leaving_remainder_in_source(): void
+    {
+        $token1 = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+        $token2 = new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]');
+        $token3 = new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]');
+        $token4 = new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]');
+
+        $collection = new PushTokenCollection($token1, $token2, $token3, $token4);
+
+        $shifted = $collection->shift(2);
+
+        $this->assertCount(2, $shifted);
+        $this->assertEquals($token1, $shifted->get(0));
+        $this->assertEquals($token2, $shifted->get(1));
+
+        $this->assertCount(2, $collection);
+        $this->assertEquals($token3, $collection->get(0));
+        $this->assertEquals($token4, $collection->get(1));
+    }
+
+    #[Test]
+    public function shift_with_default_count_removes_single_item(): void
+    {
+        $token1 = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
+        $token2 = new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]');
+
+        $collection = new PushTokenCollection($token1, $token2);
+
+        $shifted = $collection->shift();
+
+        $this->assertCount(1, $shifted);
+        $this->assertEquals($token1, $shifted->get(0));
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals($token2, $collection->get(0));
     }
 
     #[Test]
