@@ -44,7 +44,7 @@
       "@analyse"
     ],
     "test": "vendor/bin/phpunit --testdox",
-    "test-coverage": "@test --coverage-text coverage"
+    "test-coverage": "@test --coverage-text"
   },
   "autoload": {
     "psr-4": {
