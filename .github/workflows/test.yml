@@ -26,5 +26,11 @@ jobs:
           php_extensions: json zip xdebug
           configuration: phpunit.xml.dist
           coverage_text: true
-        env:
-          XDEBUG_MODE: coverage
+          coverage_clover: coverage.xml
+
+      - name: Enforce coverage threshold
+        if: matrix.php-version == '8.2'
+        uses: ericsizemore/phpunit-coverage-check-action@2.0.0
+        with:
+          clover_file: 'coverage.xml'
+          threshold: '100'
