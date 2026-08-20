@@ -355,6 +355,38 @@ class SendNotificationsTest extends TestCase
         $this->assertEquals(PushErrorCode::PushTooManyExperienceIds, $result->errors->get(0)->code);
     }
 
+    #[Test]
+    public function send_notifications_exposes_unauthorized_push_error_for_invalid_credentials(): void
+    {
+        $this->mockClient->addResponse(
+            MockResponse::make(
+                body: [
+                    'errors' => [
+                        [
+                            'code'    => 'UNAUTHORIZED',
+                            'message' => 'Invalid credentials',
+                        ],
+                    ],
+                ],
+                status: 401,
+                headers: ['Content-Type' => 'application/json'],
+            ),
+        );
+
+        $messages = new PushMessageCollection(
+            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification'),
+        );
+
+        $result = $this->service->sendNotifications($messages);
+
+        $this->mockClient->assertSentCount(1, SendNotificationsRequest::class);
+
+        $this->assertTrue($result->hasErrors());
+        $this->assertCount(1, $result->errors);
+        $this->assertEquals(PushErrorCode::Unauthorized, $result->errors->get(0)->code);
+        $this->assertCount(0, $result->tickets);
+    }
+
     // Helpers ----
 
     protected function generatePushMessage(): PushMessage
