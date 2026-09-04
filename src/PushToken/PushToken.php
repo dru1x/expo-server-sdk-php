@@ -74,7 +74,7 @@ final readonly class PushToken implements JsonSerializable, Stringable
         }
 
         // UUID-like legacy format
-        if (preg_match('/^[a-z\d]{8}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{12}$/', $this->value)) {
+        if (preg_match('/^[a-z\d]{8}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{12}$/', $value)) {
             return true;
         }
 
