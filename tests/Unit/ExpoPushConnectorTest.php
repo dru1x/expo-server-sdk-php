@@ -144,6 +144,14 @@ class ExpoPushConnectorTest extends TestCase
     // SDK Version ----
 
     #[Test]
+    public function sdk_version_resolves(): void
+    {
+        $connector = new ExpoPushConnector();
+
+        $this->assertNotSame('unknown', $connector->sdkVersion());
+    }
+
+    #[Test]
     public function sdk_version_resolves_the_real_installed_version(): void
     {
         $composerJsonPath = dirname(__DIR__, 2) . '/composer.json';
