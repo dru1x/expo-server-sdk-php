@@ -232,6 +232,17 @@ class PushMessageTest extends TestCase
     }
 
     #[Test]
+    public function from_array_throws_exception_when_rich_content_is_not_array(): void
+    {
+        $this->expectException(TypeError::class);
+
+        PushMessage::fromArray([
+            'to'          => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            'richContent' => 'not-an-array',
+        ]);
+    }
+
+    #[Test]
     public function from_array_converts_priority_to_enum(): void
     {
         $message = PushMessage::fromArray([
@@ -243,6 +254,17 @@ class PushMessageTest extends TestCase
     }
 
     #[Test]
+    public function from_array_throws_exception_when_priority_is_not_valid(): void
+    {
+        $this->expectException(TypeError::class);
+
+        PushMessage::fromArray([
+            'to'       => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            'priority' => [],
+        ]);
+    }
+
+    #[Test]
     public function from_array_converts_interruption_level_to_enum(): void
     {
         $message = PushMessage::fromArray([
@@ -251,6 +273,17 @@ class PushMessageTest extends TestCase
         ]);
 
         $this->assertSame(InterruptionLevel::Critical, $message->interruptionLevel);
+    }
+
+    #[Test]
+    public function from_array_throws_exception_when_interruption_level_is_not_valid(): void
+    {
+        $this->expectException(TypeError::class);
+
+        PushMessage::fromArray([
+            'to'                => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            'interruptionLevel' => [],
+        ]);
     }
 
     #[Test]
