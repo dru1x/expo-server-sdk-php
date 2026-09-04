@@ -43,6 +43,16 @@ class CollectionTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('doesntContainProvider')]
+    public function can_check_if_a_collection_doesnt_contain_a_given_value(mixed $item, bool $expected): void
+    {
+        $this->assertSame(
+            $expected,
+            Collection::make(1, 2)->doesntContain($item),
+        );
+    }
+
+    #[Test]
     #[DataProvider('getProvider')]
     public function can_retrieve_a_collection_value_by_its_key(int|string $key, mixed $value): void
     {
@@ -223,6 +233,15 @@ class CollectionTest extends TestCase
             'does' => [2, true],
             'doesnt' => [3, false],
             'doesnt loose' => ['2', false],
+        ];
+    }
+
+    public static function doesntContainProvider(): array
+    {
+        return [
+            'does' => [2, false],
+            'doesnt' => [3, true],
+            'doesnt loose' => ['2', true],
         ];
     }
 

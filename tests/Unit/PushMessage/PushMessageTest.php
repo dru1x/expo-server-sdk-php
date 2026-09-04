@@ -8,6 +8,7 @@ use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\RichContent;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\PushToken\PushTokenCollection;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -208,6 +209,81 @@ class PushMessageTest extends TestCase
         $this->assertSame('https://example.com', $message->richContent->image);
         $this->assertSame('test-collapse-key', $message->collapseId);
         $this->assertSame('test-tag', $message->tag);
+    }
+
+    #[Test]
+    public function from_array_throws_exception_when_to_is_missing(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        PushMessage::fromArray([
+            'title' => 'Test Notification',
+        ]);
+    }
+
+    #[Test]
+    public function from_array_throws_exception_when_to_is_not_array_or_string(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        PushMessage::fromArray([
+            'to' => 123,
+        ]);
+    }
+
+    #[Test]
+    public function from_array_throws_exception_when_rich_content_is_not_array(): void
+    {
+        $this->expectException(TypeError::class);
+
+        PushMessage::fromArray([
+            'to'          => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            'richContent' => 'not-an-array',
+        ]);
+    }
+
+    #[Test]
+    public function from_array_converts_priority_to_enum(): void
+    {
+        $message = PushMessage::fromArray([
+            'to'       => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            'priority' => 'high',
+        ]);
+
+        $this->assertSame(Priority::High, $message->priority);
+    }
+
+    #[Test]
+    public function from_array_throws_exception_when_priority_is_not_valid(): void
+    {
+        $this->expectException(TypeError::class);
+
+        PushMessage::fromArray([
+            'to'       => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            'priority' => [],
+        ]);
+    }
+
+    #[Test]
+    public function from_array_converts_interruption_level_to_enum(): void
+    {
+        $message = PushMessage::fromArray([
+            'to'                => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            'interruptionLevel' => 'critical',
+        ]);
+
+        $this->assertSame(InterruptionLevel::Critical, $message->interruptionLevel);
+    }
+
+    #[Test]
+    public function from_array_throws_exception_when_interruption_level_is_not_valid(): void
+    {
+        $this->expectException(TypeError::class);
+
+        PushMessage::fromArray([
+            'to'                => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            'interruptionLevel' => [],
+        ]);
     }
 
     #[Test]
