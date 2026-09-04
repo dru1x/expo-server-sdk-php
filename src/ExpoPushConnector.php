@@ -25,7 +25,6 @@ class ExpoPushConnector extends Connector
 
     public const MAX_CONCURRENT_REQUESTS = 6;
 
-    private static bool $sdkVersionResolved = false;
     private static ?string $sdkVersion = null;
 
     public function __construct(
@@ -86,9 +85,8 @@ class ExpoPushConnector extends Connector
      */
     public function sdkVersion(): string
     {
-        if (!self::$sdkVersionResolved) {
-            self::$sdkVersion         = self::resolveSdkVersion(dirname(__DIR__) . '/composer.json');
-            self::$sdkVersionResolved = true;
+        if (self::$sdkVersion === null) {
+            self::$sdkVersion = self::resolveSdkVersion(dirname(__DIR__) . '/composer.json');
         }
 
         return self::$sdkVersion;

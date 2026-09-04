@@ -18,8 +18,7 @@ use Saloon\RateLimitPlugin\Stores\MemoryStore;
 
 class ExpoPushConnectorTest extends TestCase
 {
-    private ?bool $originalSdkVersionResolved = null;
-    private ?string $originalSdkVersion       = null;
+    private ?string $originalSdkVersion = null;
 
     /** @var list<string> */
     private array $tempFiles = [];
@@ -28,13 +27,11 @@ class ExpoPushConnectorTest extends TestCase
     {
         parent::setUp();
 
-        $this->originalSdkVersionResolved = (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersionResolved'))->getValue();
-        $this->originalSdkVersion         = (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersion'))->getValue();
+        $this->originalSdkVersion = (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersion'))->getValue();
     }
 
     protected function tearDown(): void
     {
-        (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersionResolved'))->setValue(null, $this->originalSdkVersionResolved);
         (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersion'))->setValue(null, $this->originalSdkVersion);
 
         foreach ($this->tempFiles as $tempFile) {
@@ -184,7 +181,6 @@ class ExpoPushConnectorTest extends TestCase
     public function sdk_version_does_not_recompute_once_resolved(): void
     {
         (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersion'))->setValue(null, 'cached-test-value');
-        (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersionResolved'))->setValue(null, true);
 
         $connector = new ExpoPushConnector();
 
@@ -195,7 +191,6 @@ class ExpoPushConnectorTest extends TestCase
     public function sdk_version_caches_a_falsy_resolved_value_instead_of_recomputing_it(): void
     {
         (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersion'))->setValue(null, '');
-        (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersionResolved'))->setValue(null, true);
 
         $connector = new ExpoPushConnector();
 
