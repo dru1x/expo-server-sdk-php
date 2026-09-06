@@ -12,12 +12,12 @@ use Saloon\RateLimitPlugin\Exceptions\RateLimitReachedException;
 
 final class RequestExceptionHandler
 {
-    public function __construct(protected int $batchSize, protected PushErrorCollection $errors) {}
+    public function __construct(protected int $batchSize, protected int $totalCount, protected PushErrorCollection $errors) {}
 
     public function __invoke(FatalRequestException|RequestException|RateLimitReachedException $exception, int $requestIndex): void
     {
         $startIndex = $requestIndex * $this->batchSize;
-        $endIndex   = $startIndex + $this->batchSize - 1;
+        $endIndex   = min($startIndex + $this->batchSize, $this->totalCount) - 1;
 
         // The request completely failed
         if ($exception instanceof FatalRequestException) {
