@@ -160,7 +160,9 @@ final class SendNotificationsRequest extends Request implements HasBody
 
             try {
                 // Calculate the size of the data field when converted to JSON
-                $dataBytes = strlen(json_encode($pushMessage->data, JSON_THROW_ON_ERROR));
+                $dataBytes = strlen(
+                    json_encode($pushMessage->data, flags: JSON_THROW_ON_ERROR | $this->jsonFormattingFlags()),
+                );
             } catch (JsonException $e) {
                 throw new InvalidArgumentException(
                     "Push message data could not be encoded as JSON: {$e->getMessage()}",
