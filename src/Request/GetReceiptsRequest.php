@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dru1x\ExpoPush\Request;
 
 use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
@@ -115,6 +117,7 @@ final class GetReceiptsRequest extends Request implements HasBody
 
     /**
      * @return array{ids: array<int, string>}
+     * @throws OverflowException If too many receipt IDs are included in this request
      */
     protected function defaultBody(): array
     {
@@ -129,6 +132,7 @@ final class GetReceiptsRequest extends Request implements HasBody
      * Prevent the max number of receipts per request being exceeded
      *
      * @return void
+     * @throws OverflowException If the number of receipt IDs in this request exceeds the limit
      */
     protected function preventTooManyReceipts(): void
     {

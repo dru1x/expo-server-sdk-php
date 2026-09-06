@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dru1x\ExpoPush\PushMessage;
 
 use Dru1x\ExpoPush\Support\ConvertsFromJson;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dru1x\ExpoPush\Request;
 
 use Dru1x\ExpoPush\PushMessage\PushMessage;
@@ -123,6 +125,8 @@ final class SendNotificationsRequest extends Request implements HasBody
 
     /**
      * @return array<int, PushMessage>
+     * @throws OverflowException If too many notifications, or too much message data, is included in this request
+     * @throws InvalidArgumentException If any push message's data cannot be encoded as JSON
      */
     protected function defaultBody(): array
     {
@@ -136,6 +140,7 @@ final class SendNotificationsRequest extends Request implements HasBody
      * Prevent the max number of notifications per request being exceeded
      *
      * @return void
+     * @throws OverflowException If the number of notifications in this request exceeds the limit
      */
     protected function preventTooManyMessages(): void
     {
@@ -150,6 +155,8 @@ final class SendNotificationsRequest extends Request implements HasBody
      * Prevent the data field of any message being larger than the limit
      *
      * @return void
+     * @throws InvalidArgumentException If any push message's data cannot be encoded as JSON
+     * @throws OverflowException If any push message's data exceeds the size limit once encoded
      */
     protected function preventTooMuchMessageData(): void
     {

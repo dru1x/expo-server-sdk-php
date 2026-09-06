@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dru1x\ExpoPush\PushMessage;
 
 use Dru1x\ExpoPush\PushToken\PushToken;
@@ -113,6 +115,8 @@ final readonly class PushMessage implements JsonSerializable
 
     /**
      * @param array<mixed> $data
+     *
+     * @throws InvalidArgumentException If the given data does not include at least one recipient token
      */
     public static function fromArray(array $data): self
     {
