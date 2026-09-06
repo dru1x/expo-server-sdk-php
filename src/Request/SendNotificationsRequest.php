@@ -18,17 +18,13 @@ use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
-use Saloon\Repositories\Body\JsonBodyRepository;
-use Saloon\Traits\Body\HasJsonBody;
 use Saloon\Traits\Plugins\AcceptsJson;
 use UnexpectedValueException;
 
 final class SendNotificationsRequest extends Request implements HasBody
 {
     use AcceptsJson;
-    use HasJsonBody {
-        body as protected buildBody;
-    }
+    use HasJsonBody;
     use CompressesBody;
 
     public const MAX_NOTIFICATION_COUNT = 100;
@@ -41,11 +37,6 @@ final class SendNotificationsRequest extends Request implements HasBody
     public function resolveEndpoint(): string
     {
         return '/send';
-    }
-
-    public function body(): JsonBodyRepository
-    {
-        return $this->buildBody()->setJsonFlags(JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     // DTO ----
