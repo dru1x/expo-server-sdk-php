@@ -13,6 +13,7 @@ use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Request\SendNotificationsRequest;
 use InvalidArgumentException;
+use JsonException;
 use OverflowException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -277,5 +278,71 @@ class SendNotificationsRequestTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $request->body();
+    }
+
+    #[Test]
+    public function body_sets_expected_json_flags(): void
+    {
+        $request = new SendNotificationsRequest(
+            new PushMessageCollection(),
+        );
+
+        $this->assertSame(
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
+            $request->body()->getJsonFlags(),
+        );
+    }
+
+    #[Test]
+    public function body_does_not_escape_slashes(): void
+    {
+        $request = new SendNotificationsRequest(
+            new PushMessageCollection(
+                new PushMessage(
+                    to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                    title: 'https://example.com',
+                ),
+            ),
+        );
+
+        $json = (string) $request->body();
+
+        $this->assertStringContainsString('https://example.com', $json);
+        $this->assertStringNotContainsString('https:\/\/example.com', $json);
+    }
+
+    #[Test]
+    public function body_does_not_escape_unicode_characters(): void
+    {
+        $request = new SendNotificationsRequest(
+            new PushMessageCollection(
+                new PushMessage(
+                    to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                    title: 'café 🎉',
+                ),
+            ),
+        );
+
+        $json = (string) $request->body();
+
+        $this->assertStringContainsString('café 🎉', $json);
+        $this->assertStringNotContainsString('\u00e9', $json);
+    }
+
+    #[Test]
+    public function body_throws_json_exception_when_data_contains_invalid_utf8(): void
+    {
+        $request = new SendNotificationsRequest(
+            new PushMessageCollection(
+                new PushMessage(
+                    to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
+                    title: "\xB1\x31",
+                ),
+            ),
+        );
+
+        $this->expectException(JsonException::class);
+
+        (string) $request->body();
     }
 }
