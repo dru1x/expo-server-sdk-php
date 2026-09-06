@@ -306,6 +306,62 @@ class SendNotificationsTest extends TestCase
     }
 
     #[Test]
+    public function send_notifications_reports_correct_end_index_for_partial_final_batch(): void
+    {
+        $messages = $this->generatePushMessages(950);
+
+        foreach ($messages->chunk(100) as $index => $messageChunk) {
+
+            if ($index === 9) {
+                $this->mockClient->addResponse(
+                    MockResponse::make(
+                        body: [
+                            'errors' => [
+                                [
+                                    'code'    => 'PUSH_TOO_MANY_EXPERIENCE_IDS',
+                                    'message' => 'You are trying to send push notifications to different Expo experiences',
+                                ],
+                            ],
+                        ],
+                        status: 400,
+                        headers: ['Content-Type' => 'application/json'],
+                    ),
+                );
+
+                continue;
+            }
+
+            $responseBody = [
+                'data' => array_map(fn(PushMessage $message) => [
+                    'status' => 'ok',
+                    'id'     => $this->generatePushReceiptId(),
+                ], $messageChunk->toArray()),
+            ];
+
+            $this->mockClient->addResponse(
+                MockResponse::make(
+                    body: $responseBody,
+                    headers: ['Content-Type' => 'application/json'],
+                ),
+            );
+        }
+
+        $result = $this->service->sendNotifications($messages);
+
+        $this->mockClient->assertSentCount(10, SendNotificationsRequest::class);
+
+        $this->assertCount(900, $result->tickets);
+
+        $this->assertTrue($result->hasErrors());
+        $this->assertCount(1, $result->errors);
+
+        $error = $result->errors->get(0);
+        $this->assertEquals(PushErrorCode::PushTooManyExperienceIds, $error->code);
+        $this->assertEquals(900, $error->startIndex);
+        $this->assertEquals(949, $error->endIndex);
+    }
+
+    #[Test]
     public function send_notifications_exposes_push_errors_for_each_request_error(): void
     {
         $messages = $this->generatePushMessages(1000);

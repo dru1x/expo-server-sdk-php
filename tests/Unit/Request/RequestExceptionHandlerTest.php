@@ -26,7 +26,7 @@ class RequestExceptionHandlerTest extends TestCase
         parent::setUp();
 
         $this->errors  = new PushErrorCollection();
-        $this->handler = new RequestExceptionHandler(batchSize: 100, errors: $this->errors);
+        $this->handler = new RequestExceptionHandler(batchSize: 100, totalCount: 1000, errors: $this->errors);
     }
 
     #[Test]
@@ -193,5 +193,21 @@ class RequestExceptionHandlerTest extends TestCase
         $this->assertEquals('There was an error with the request: 500', $error->message);
         $this->assertEquals(400, $error->startIndex);
         $this->assertEquals(499, $error->endIndex);
+    }
+
+    #[Test]
+    public function invoke_clamps_end_index_for_partial_final_batch(): void
+    {
+        $handler = new RequestExceptionHandler(batchSize: 100, totalCount: 950, errors: $this->errors);
+
+        $fatalRequestException = $this->createMock(FatalRequestException::class);
+
+        $handler($fatalRequestException, 9);
+
+        $this->assertCount(1, $this->errors);
+
+        $error = $this->errors->get(0);
+        $this->assertEquals(900, $error->startIndex);
+        $this->assertEquals(949, $error->endIndex);
     }
 }

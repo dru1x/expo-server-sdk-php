@@ -175,6 +175,62 @@ class GetReceiptsTest extends TestCase
     }
 
     #[Test]
+    public function get_receipts_reports_correct_end_index_for_partial_final_batch(): void
+    {
+        $receiptIds = $this->generatePushReceiptIds(10500);
+
+        foreach ($receiptIds->chunk(1000) as $index => $receiptIdChunk) {
+
+            if ($index === 10) {
+                $this->mockClient->addResponse(
+                    MockResponse::make(
+                        body: [
+                            'errors' => [
+                                [
+                                    'code'    => 'PUSH_TOO_MANY_RECEIPTS',
+                                    'message' => 'You are trying to get more than 1000 push receipts in one request',
+                                ],
+                            ],
+                        ],
+                        status: 400,
+                        headers: ['Content-Type' => 'application/json'],
+                    ),
+                );
+
+                continue;
+            }
+
+            $responseBody = [
+                'data' => array_combine(
+                    $receiptIdChunk->toArray(),
+                    array_fill(0, count($receiptIdChunk), ['status' => 'ok']),
+                ),
+            ];
+
+            $this->mockClient->addResponse(
+                MockResponse::make(
+                    body: $responseBody,
+                    headers: ['Content-Type' => 'application/json'],
+                ),
+            );
+        }
+
+        $result = $this->service->getReceipts($receiptIds);
+
+        $this->mockClient->assertSentCount(11, GetReceiptsRequest::class);
+
+        $this->assertCount(10000, $result->receipts);
+
+        $this->assertTrue($result->hasErrors());
+        $this->assertCount(1, $result->errors);
+
+        $error = $result->errors->get(0);
+        $this->assertEquals(PushErrorCode::PushTooManyReceipts, $error->code);
+        $this->assertEquals(10000, $error->startIndex);
+        $this->assertEquals(10499, $error->endIndex);
+    }
+
+    #[Test]
     public function get_receipts_exposes_push_errors_for_each_request_error(): void
     {
         $receiptIds = $this->generatePushReceiptIds(10000);
