@@ -25,6 +25,8 @@ class ExpoPushConnector extends Connector
 
     public const MAX_CONCURRENT_REQUESTS = 6;
 
+    private static ?string $sdkVersion = null;
+
     public function __construct(
         protected ?string $authToken = null,
         ?RateLimitStore   $rateLimitStore = null,
@@ -83,17 +85,29 @@ class ExpoPushConnector extends Connector
      */
     public function sdkVersion(): string
     {
-        static $version = null;
-
-        if (!$version) {
-            $composer = json_decode(
-                file_get_contents(dirname(__DIR__) . '/composer.json'),
-            );
-
-            $version = InstalledVersions::getPrettyVersion($composer->name);
+        if (self::$sdkVersion === null) {
+            self::$sdkVersion = self::resolveSdkVersion(dirname(__DIR__) . '/composer.json');
         }
 
-        return (string) $version;
+        return self::$sdkVersion;
+    }
+
+    /**
+     * Resolve the installed version from composer.json, falling back to 'unknown' if it can't be determined
+     */
+    private static function resolveSdkVersion(string $composerJsonPath): string
+    {
+        if (!is_readable($composerJsonPath)) {
+            return 'unknown';
+        }
+
+        try {
+            $composer = json_decode(file_get_contents($composerJsonPath), flags: JSON_THROW_ON_ERROR);
+
+            return InstalledVersions::getPrettyVersion($composer->name) ?? 'unknown';
+        } catch (Throwable) {
+            return 'unknown';
+        }
     }
 
     // Internals ----

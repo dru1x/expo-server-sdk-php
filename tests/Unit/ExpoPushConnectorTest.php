@@ -4,10 +4,13 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit;
 
+use Composer\InstalledVersions;
 use Dru1x\ExpoPush\Config\RetryConfig;
 use Dru1x\ExpoPush\ExpoPushConnector;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
+use ReflectionProperty;
 use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\RateLimitPlugin\Exceptions\LimitException;
 use Saloon\RateLimitPlugin\Limit;
@@ -15,6 +18,31 @@ use Saloon\RateLimitPlugin\Stores\MemoryStore;
 
 class ExpoPushConnectorTest extends TestCase
 {
+    private ?string $originalSdkVersion = null;
+
+    /** @var list<string> */
+    private array $tempFiles = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->originalSdkVersion = (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersion'))->getValue();
+    }
+
+    protected function tearDown(): void
+    {
+        (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersion'))->setValue(null, $this->originalSdkVersion);
+
+        foreach ($this->tempFiles as $tempFile) {
+            is_file($tempFile) && unlink($tempFile);
+        }
+
+        $this->tempFiles = [];
+
+        parent::tearDown();
+    }
+
     #[Test]
     public function resolves_the_expo_push_api_base_url(): void
     {
@@ -113,7 +141,88 @@ class ExpoPushConnectorTest extends TestCase
         $this->assertFalse($connector->throwOnMaxTries);
     }
 
+    // SDK Version ----
+
+    #[Test]
+    public function sdk_version_resolves(): void
+    {
+        $connector = new ExpoPushConnector();
+
+        $this->assertNotSame('unknown', $connector->sdkVersion());
+    }
+
+    #[Test]
+    public function sdk_version_resolves_the_real_installed_version(): void
+    {
+        $composerJsonPath = dirname(__DIR__, 2) . '/composer.json';
+        $composer         = json_decode(file_get_contents($composerJsonPath));
+
+        $this->assertSame(
+            InstalledVersions::getPrettyVersion($composer->name),
+            $this->resolveSdkVersion($composerJsonPath),
+        );
+    }
+
+    #[Test]
+    public function sdk_version_falls_back_to_unknown_when_composer_json_is_missing(): void
+    {
+        $this->assertSame('unknown', $this->resolveSdkVersion('/nonexistent/composer.json'));
+    }
+
+    #[Test]
+    public function sdk_version_falls_back_to_unknown_when_composer_json_is_malformed(): void
+    {
+        $path = $this->writeTempFile('{not valid json');
+
+        $this->assertSame('unknown', $this->resolveSdkVersion($path));
+    }
+
+    #[Test]
+    public function sdk_version_falls_back_to_unknown_when_the_package_is_not_installed(): void
+    {
+        $path = $this->writeTempFile(json_encode(['name' => 'not/a-real-package']));
+
+        $this->assertSame('unknown', $this->resolveSdkVersion($path));
+    }
+
+    #[Test]
+    public function sdk_version_does_not_recompute_once_resolved(): void
+    {
+        (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersion'))->setValue(null, 'cached-test-value');
+
+        $connector = new ExpoPushConnector();
+
+        $this->assertSame('cached-test-value', $connector->sdkVersion());
+    }
+
+    #[Test]
+    public function sdk_version_caches_a_falsy_resolved_value_instead_of_recomputing_it(): void
+    {
+        (new ReflectionProperty(ExpoPushConnector::class, 'sdkVersion'))->setValue(null, '');
+
+        $connector = new ExpoPushConnector();
+
+        $this->assertSame('', $connector->sdkVersion());
+    }
+
     // Internals ----
+
+    private function resolveSdkVersion(string $composerJsonPath): string
+    {
+        return (new ReflectionMethod(ExpoPushConnector::class, 'resolveSdkVersion'))
+            ->invoke(null, $composerJsonPath);
+    }
+
+    private function writeTempFile(string $contents): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'expo-push-sdk-version-test-');
+
+        file_put_contents($path, $contents);
+
+        $this->tempFiles[] = $path;
+
+        return $path;
+    }
 
     private function findLimit(ExpoPushConnector $connector, string $name): Limit
     {
