@@ -58,7 +58,7 @@ class ExpoPush
 
         // Prepare a new request pool
         $batchSize = SendNotificationsRequest::MAX_NOTIFICATION_COUNT;
-        $pool      = $this->makeRequestPool($batchSize, $errors);
+        $pool      = $this->makeRequestPool($batchSize, $pushMessages->notificationCount(), $errors);
 
         // Split the message collection into a set of requests and add them to the pool
         $pool->setRequests(function () use ($batchSize, $pushMessages): Generator {
@@ -122,7 +122,7 @@ class ExpoPush
 
         // Prepare a new request pool
         $batchSize = GetReceiptsRequest::MAX_RECEIPT_COUNT;
-        $pool      = $this->makeRequestPool($batchSize, $errors);
+        $pool      = $this->makeRequestPool($batchSize, $receiptIds->count(), $errors);
 
         // Split the receipt ID collection into a set of requests and add them to the pool
         $pool->setRequests(function () use ($batchSize, $receiptIds): Generator {
@@ -181,16 +181,17 @@ class ExpoPush
      * Make a request pool with a concurrency limit and error handler
      *
      * @param int                 $batchSize The max number of elements to be sent per request
+     * @param int                 $totalCount The total number of elements being sent across all requests
      * @param PushErrorCollection $errors A collection in which to store any push errors
      *
      * @return Pool
      */
-    protected function makeRequestPool(int $batchSize, PushErrorCollection $errors): Pool
+    protected function makeRequestPool(int $batchSize, int $totalCount, PushErrorCollection $errors): Pool
     {
         // Make a new pool with a concurrency limit and exception handler
         return $this->connector->pool(
             concurrency: $this->connector::MAX_CONCURRENT_REQUESTS,
-            exceptionHandler: new RequestExceptionHandler($batchSize, $errors),
+            exceptionHandler: new RequestExceptionHandler($batchSize, $totalCount, $errors),
         );
     }
 }
