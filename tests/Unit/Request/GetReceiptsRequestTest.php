@@ -9,6 +9,7 @@ use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptErrorCode;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
 use Dru1x\ExpoPush\Request\GetReceiptsRequest;
+use JsonException;
 use OverflowException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -252,6 +253,57 @@ class GetReceiptsRequestTest extends TestCase
         $this->expectException(OverflowException::class);
 
         $request->body();
+    }
+
+    #[Test]
+    public function body_sets_expected_json_flags(): void
+    {
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection(),
+        );
+
+        $this->assertSame(
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
+            $request->body()->getJsonFlags(),
+        );
+    }
+
+    #[Test]
+    public function body_does_not_escape_slashes(): void
+    {
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection('XXXX/YYYY'),
+        );
+
+        $json = (string) $request->body();
+
+        $this->assertStringContainsString('XXXX/YYYY', $json);
+        $this->assertStringNotContainsString('XXXX\/YYYY', $json);
+    }
+
+    #[Test]
+    public function body_does_not_escape_unicode_characters(): void
+    {
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection('café-🎉'),
+        );
+
+        $json = (string) $request->body();
+
+        $this->assertStringContainsString('café-🎉', $json);
+        $this->assertStringNotContainsString('\u00e9', $json);
+    }
+
+    #[Test]
+    public function body_throws_json_exception_when_data_contains_invalid_utf8(): void
+    {
+        $request = new GetReceiptsRequest(
+            new PushReceiptIdCollection("\xB1\x31"),
+        );
+
+        $this->expectException(JsonException::class);
+
+        (string) $request->body();
     }
 
     // Helpers ----
