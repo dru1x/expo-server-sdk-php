@@ -34,7 +34,7 @@ final class PushReceiptCollection implements Collection
      */
     public function getById(string $receiptId): ?PushReceipt
     {
-        if(isset($this->map)) {
+        if (isset($this->map)) {
             return $this->map[$receiptId] ?? null;
         }
 
