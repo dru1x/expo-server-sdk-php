@@ -100,14 +100,13 @@ final class PushMessageCollection implements Collection
      */
     public function getTokens(): PushTokenCollection
     {
-        $extractPushTokens = fn(array $carry, PushMessage $message) => array_merge(
-            $carry,
-            $message->to instanceof PushToken ? [$message->to] : $message->to->all(),
-        );
+        $tokens = [];
 
-        return new PushTokenCollection(
-            ...array_reduce($this->items, $extractPushTokens, []),
-        );
+        foreach ($this->items as $message) {
+            $tokens[] = $message->allTokens()->all();
+        }
+
+        return new PushTokenCollection(...array_merge(...$tokens));
     }
 
     // Internals ----
