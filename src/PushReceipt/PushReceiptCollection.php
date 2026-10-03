@@ -15,6 +15,9 @@ final class PushReceiptCollection implements Collection
     /** @use CollectionMethods<int, PushReceipt> */
     use CollectionMethods;
 
+    /** @var array<string, PushReceipt> */
+    protected array $map;
+
     public function __construct(PushReceipt ...$pushReceipts)
     {
         $this->items = $pushReceipts;
@@ -31,12 +34,14 @@ final class PushReceiptCollection implements Collection
      */
     public function getById(string $receiptId): ?PushReceipt
     {
-        foreach ($this->items as $receipt) {
-            if ($receipt->id === $receiptId) {
-                return $receipt;
-            }
+        if(isset($this->map)) {
+            return $this->map[$receiptId] ?? null;
         }
 
-        return null;
+        foreach ($this->items as $receipt) {
+            $this->map[$receipt->id] = $receipt;
+        }
+
+        return $this->map[$receiptId] ?? null;
     }
 }
