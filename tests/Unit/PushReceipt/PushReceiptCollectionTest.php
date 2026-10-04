@@ -31,6 +31,43 @@ class PushReceiptCollectionTest extends TestCase
     }
 
     #[Test]
+    public function add_doesnt_exclude_new_receipt_from_internal_cache(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+        );
+
+        $receipt = $collection->getById('AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA');
+        $this->assertNull($receipt);
+
+        $collection->add(new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'));
+
+        $this->assertEquals(
+            'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            $collection->getById('AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA')->id,
+        );
+    }
+
+    #[Test]
+    public function add_doesnt_exclude_existing_receipts_from_internal_cache(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+        );
+
+        $collection->add(new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'));
+
+        $this->assertEquals(
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            $collection->getById('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')->id,
+        );
+    }
+
+    #[Test]
     public function set_inserts_receipt_to_collection_at_index(): void
     {
         $collection = new PushReceiptCollection();
@@ -53,6 +90,61 @@ class PushReceiptCollectionTest extends TestCase
 
         $this->assertCount(1, $collection);
         $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $collection->get(0)->id);
+    }
+
+    #[Test]
+    public function set_doesnt_exclude_new_receipt_from_internal_cache(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+        );
+
+        $receipt = $collection->getById('AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA');
+        $this->assertNull($receipt);
+
+        $collection->set(3, new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'));
+
+        $this->assertEquals(
+            'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            $collection->getById('AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA')->id,
+        );
+    }
+
+    #[Test]
+    public function set_doesnt_exclude_existing_receipts_from_internal_cache(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+        );
+
+        $collection->set(3, new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'));
+
+        $this->assertEquals(
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            $collection->getById('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')->id,
+        );
+    }
+
+    #[Test]
+    public function set_replaces_receipt_in_primed_cache(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+        );
+
+        $receipt = $collection->getById('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+        $this->assertNotNull($receipt);
+
+        $collection->set(0, new SuccessfulPushReceipt(id: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'));
+
+        $receipt = $collection->getById('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+        $this->assertNull($receipt);
     }
 
     #[Test]
@@ -81,9 +173,25 @@ class PushReceiptCollectionTest extends TestCase
         );
 
         $receipt = $collection->getById('ABCDEFGH-ABCDEF-ABCDEF-ABCDEF-ABCDEFGHIJKL');
-        ;
 
         $this->assertNull($receipt);
+    }
+
+    #[Test]
+    public function get_by_id_returns_earlier_result_in_case_of_overlap(): void
+    {
+        $expected = new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+        $duplicate = new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+
+        $collection = new PushReceiptCollection(
+            $expected,
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            $duplicate,
+        );
+
+        $receipt = $collection->getById('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+
+        $this->assertSame($expected, $receipt);
     }
 
     #[Test]
