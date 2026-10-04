@@ -178,6 +178,21 @@ class PushReceiptCollectionTest extends TestCase
     }
 
     #[Test]
+    public function get_by_id_returns_correct_receipt_on_subsequent_call(): void
+    {
+        $collection = new PushReceiptCollection(
+            new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'),
+            new SuccessfulPushReceipt(id: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'),
+            new SuccessfulPushReceipt(id: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'),
+        );
+
+        $initial = $collection->getById('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
+        $subsequent = $collection->getById('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
+
+        $this->assertSame($initial, $subsequent);
+    }
+
+    #[Test]
     public function get_by_id_returns_earlier_result_in_case_of_overlap(): void
     {
         $expected = new SuccessfulPushReceipt(id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
