@@ -13,11 +13,11 @@ use stdClass;
 class PushReceiptIdListTest extends TestCase
 {
     #[Test]
-    public function add_appends_receipt_id_to_collection(): void
+    public function push_appends_receipt_id_to_collection(): void
     {
         $collection = new PushReceiptIdList(['XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX']);
 
-        $collection->add('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
+        $collection->push('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
 
         $this->assertCount(2, $collection);
 
@@ -289,13 +289,13 @@ class PushReceiptIdListTest extends TestCase
 
     #[Test]
     #[DataProvider('invalidReceiptIdProvider')]
-    public function add_throws_exception_for_invalid_receipt_id(mixed $receiptId): void
+    public function push_throws_exception_for_invalid_receipt_id(mixed $receiptId): void
     {
         $collection = new PushReceiptIdList();
 
         $this->expectException(InvalidArgumentException::class);
 
-        $collection->add($receiptId);
+        $collection->push($receiptId);
     }
 
     #[Test]

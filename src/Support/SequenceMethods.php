@@ -16,26 +16,20 @@ trait SequenceMethods
     // Setup ----
 
     /**
-     * @param array<array-key, TValue> $items
+     * @param array<array-key, TValue> $values
      */
-    public function __construct(array $items = [])
+    public function __construct(array $values = [])
     {
-        $this->addAll($items);
+        $this->push(...array_values($values));
     }
 
     // Mutators ----
 
-    public function add(mixed $value): void
-    {
-        $this->validateValue($value);
-
-        $this->items[] = $value;
-    }
-
-    public function addAll(Sequence|array $values): void
+    public function push(mixed ...$values): void
     {
         foreach ($values as $value) {
-            $this->add($value);
+            $this->validateValue($value);
+            $this->values[] = $value;
         }
     }
 
@@ -43,7 +37,7 @@ trait SequenceMethods
     {
         return new static(
             array_values(
-                array_merge($this->items, $other->toArray()),
+                array_merge($this->values, $other->toArray()),
             ),
         );
     }
@@ -52,7 +46,7 @@ trait SequenceMethods
     {
         return new static(
             array_values(
-                array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH),
+                array_filter($this->values, $callback, ARRAY_FILTER_USE_BOTH),
             ),
         );
     }
@@ -61,15 +55,15 @@ trait SequenceMethods
 
     public function first(): mixed
     {
-        $key = array_key_first($this->items);
+        $key = array_key_first($this->values);
 
-        return $key === null ? null : $this->items[$key];
+        return $key === null ? null : $this->values[$key];
     }
 
     public function last(): mixed
     {
-        $key = array_key_last($this->items);
+        $key = array_key_last($this->values);
 
-        return $key === null ? null : $this->items[$key];
+        return $key === null ? null : $this->values[$key];
     }
 }

@@ -70,7 +70,7 @@ final class SendNotificationsRequest extends Request implements HasBody
             $status = PushStatus::from($ticketData['status']);
 
             // Instantiate and add a ticket to the collection based on the status
-            $tickets->add(match ($status) {
+            $tickets->push(match ($status) {
                 PushStatus::Ok    => $this->makeSuccessfulPushTicket($token, $ticketData),
                 PushStatus::Error => $this->makeFailedPushTicket($token, $ticketData),
             });

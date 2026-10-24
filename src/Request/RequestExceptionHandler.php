@@ -21,7 +21,7 @@ final class RequestExceptionHandler
 
         // The request completely failed
         if ($exception instanceof FatalRequestException) {
-            $this->errors->add(new PushError(
+            $this->errors->push(new PushError(
                 code: PushErrorCode::Failed,
                 message: $exception->getMessage(),
                 startIndex: $startIndex,
@@ -32,7 +32,7 @@ final class RequestExceptionHandler
 
         // A rate limit was reached
         if ($exception instanceof RateLimitReachedException) {
-            $this->errors->add(new PushError(
+            $this->errors->push(new PushError(
                 code: PushErrorCode::TooManyRequests,
                 message: $exception->getMessage(),
                 startIndex: $startIndex,
@@ -52,7 +52,7 @@ final class RequestExceptionHandler
 
         // No errors were present in the response body
         if (!is_array($responseErrors)) {
-            $this->errors->add(new PushError(
+            $this->errors->push(new PushError(
                 code: PushErrorCode::Failed,
                 message: $exception->getMessage(),
                 startIndex: $startIndex,
@@ -65,7 +65,7 @@ final class RequestExceptionHandler
         foreach ($responseErrors as $responseError) {
             $responseErrorCode = $responseError['code'] ?? null;
 
-            $this->errors->add(new PushError(
+            $this->errors->push(new PushError(
                 code: PushErrorCode::tryFrom($responseErrorCode) ?? PushErrorCode::Unknown,
                 message: $responseError['message'] ?? 'Unknown error',
                 details: $responseError['details'] ?? null,

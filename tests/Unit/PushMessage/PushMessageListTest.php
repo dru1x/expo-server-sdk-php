@@ -16,7 +16,7 @@ use stdClass;
 class PushMessageListTest extends TestCase
 {
     #[Test]
-    public function add_appends_message_to_collection(): void
+    public function push_appends_message_to_collection(): void
     {
         $collection = new PushMessageList([
             new PushMessage(
@@ -25,7 +25,7 @@ class PushMessageListTest extends TestCase
             ),
         ]);
 
-        $collection->add(new PushMessage(
+        $collection->push(new PushMessage(
             to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
             title: 'Test Notification 2',
         ));
@@ -545,12 +545,12 @@ class PushMessageListTest extends TestCase
     }
 
     #[Test]
-    public function add_throws_exception_for_invalid_value(): void
+    public function push_throws_exception_for_invalid_value(): void
     {
         $collection = new PushMessageList();
 
         $this->expectException(InvalidArgumentException::class);
 
-        $collection->add(new stdClass());
+        $collection->push(new stdClass());
     }
 }

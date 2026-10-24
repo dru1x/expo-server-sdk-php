@@ -18,11 +18,11 @@ trait CollectionMethods
     use ConvertsToJson;
 
     /**
-     * The items contained in the collection
+     * The values contained in the collection
      *
      * @var array<TKey, TValue>
      */
-    protected array $items = [];
+    protected array $values = [];
 
     // Setup ----
 
@@ -43,32 +43,32 @@ trait CollectionMethods
 
     public function map(callable $callback): iterable
     {
-        $keys = array_keys($this->items);
-        $values = array_map($callback, $this->items, $keys);
+        $keys = array_keys($this->values);
+        $values = array_map($callback, $this->values, $keys);
 
         return array_combine($keys, $values);
     }
 
     public function reduce(callable $callback, mixed $initial = null): mixed
     {
-        return array_reduce($this->items, $callback, $initial);
+        return array_reduce($this->values, $callback, $initial);
     }
 
     public function chunk(int $length): iterable
     {
-        return array_map(static::make(...), array_chunk($this->items, $length, preserve_keys: true));
+        return array_map(static::make(...), array_chunk($this->values, $length, preserve_keys: true));
     }
 
     // Accessors ----
 
     public function get(mixed $key): mixed
     {
-        return $this->items[$key] ?? null;
+        return $this->values[$key] ?? null;
     }
 
     public function isEmpty(): bool
     {
-        return empty($this->items);
+        return empty($this->values);
     }
 
     public function isNotEmpty(): bool
@@ -78,7 +78,7 @@ trait CollectionMethods
 
     public function contains(mixed $value): bool
     {
-        return in_array($value, $this->items, true);
+        return in_array($value, $this->values, true);
     }
 
     public function doesNotContain(mixed $value): bool
@@ -88,21 +88,21 @@ trait CollectionMethods
 
     public function toArray(): array
     {
-        return $this->items;
+        return $this->values;
     }
 
     // Countable ----
 
     public function count(): int
     {
-        return count($this->items);
+        return count($this->values);
     }
 
     // IteratorAggregate ----
 
     public function getIterator(): Traversable
     {
-        return new ArrayIterator($this->items);
+        return new ArrayIterator($this->values);
     }
 
     // Internals ----

@@ -27,7 +27,7 @@ final class PushMessageList implements Sequence
      */
     public function notificationCount(): int
     {
-        return array_reduce($this->items, fn(int $count, PushMessage $message) => $count + $message->tokenCount(), 0);
+        return array_reduce($this->values, fn(int $count, PushMessage $message) => $count + $message->tokenCount(), 0);
     }
 
     /**
@@ -54,7 +54,7 @@ final class PushMessageList implements Sequence
         $currentChunk = new self();
         $allChunks    = [$currentChunk];
 
-        foreach ($this->items as $pushMessage) {
+        foreach ($this->values as $pushMessage) {
 
             // Calculate how much notification space is left in the current chunk
             $currentChunkCapacity = $this->ensureChunkHasCapacity($size, $currentChunk, $allChunks);
@@ -64,7 +64,7 @@ final class PushMessageList implements Sequence
 
             // If the current message will fit in the current chunk, add it now and move on to the next one
             if ($currentChunkCapacity >= $notificationCount) {
-                $currentChunk->add($pushMessage);
+                $currentChunk->push($pushMessage);
                 continue;
             }
 
@@ -78,7 +78,7 @@ final class PushMessageList implements Sequence
                 $currentChunkCapacity = $this->ensureChunkHasCapacity($size, $currentChunk, $allChunks);
 
                 // Take as many tokens as will fit in the chunk, add them to a message copy, and add it to the chunk
-                $currentChunk->add(
+                $currentChunk->push(
                     $pushMessage->copy(to: $recipientTokens->shift($currentChunkCapacity)),
                 );
             }
@@ -96,7 +96,7 @@ final class PushMessageList implements Sequence
     {
         $tokens = [];
 
-        foreach ($this->items as $message) {
+        foreach ($this->values as $message) {
             $tokens[] = $message->allTokens()->toArray();
         }
 

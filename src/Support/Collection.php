@@ -17,9 +17,9 @@ interface Collection extends Countable, IteratorAggregate, JsonSerializable
     // Setup ----
 
     /**
-     * @param array<TKey, TValue> $items
+     * @param array<TKey, TValue> $values
      */
-    public function __construct(array $items = []);
+    public function __construct(array $values = []);
 
     /**
      * @param iterable<TKey, TValue> $items

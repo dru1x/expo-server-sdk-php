@@ -40,7 +40,7 @@ final class PushTokenList implements Sequence
         }
 
         return new self(
-            array_splice($this->items, 0, $count),
+            array_splice($this->values, 0, $count),
         );
     }
 

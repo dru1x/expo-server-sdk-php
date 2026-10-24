@@ -97,22 +97,39 @@ class SequenceTest extends TestCase
     }
 
     #[Test]
-    public function can_add_a_value_to_a_sequence(): void
+    public function can_push_a_value_to_a_sequence(): void
     {
         $sequence = Sequence::make([1, 2]);
-        $sequence->add(3);
+        $sequence->push(3);
 
         $this->assertSequence([1, 2, 3], $sequence);
     }
 
     #[Test]
-    #[DataProvider('addAllProvider')]
-    public function can_add_multiple_values_to_a_sequence(array|SequenceInterface $values): void
+    public function can_push_multiple_values_to_a_sequence(): void
     {
         $sequence = Sequence::make([1, 2]);
-        $sequence->addAll($values);
+        $sequence->push(3, 4);
 
         $this->assertSequence([1, 2, 3, 4], $sequence);
+    }
+
+    #[Test]
+    public function pushing_a_spread_sequence_appends_its_values(): void
+    {
+        $sequence = Sequence::make([1, 2]);
+        $sequence->push(...Sequence::make([3, 4]));
+
+        $this->assertSequence([1, 2, 3, 4], $sequence);
+    }
+
+    #[Test]
+    public function pushing_no_values_leaves_the_sequence_unchanged(): void
+    {
+        $sequence = Sequence::make([1, 2]);
+        $sequence->push();
+
+        $this->assertSequence([1, 2], $sequence);
     }
 
     #[Test]
@@ -240,14 +257,25 @@ class SequenceTest extends TestCase
     }
 
     #[Test]
-    public function adding_an_invalid_value_throws_an_exception(): void
+    public function pushing_an_invalid_value_throws_an_exception(): void
     {
         $sequence = Sequence::make();
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid value of type stdClass');
 
-        $sequence->add(new stdClass());
+        $sequence->push(new stdClass());
+    }
+
+    #[Test]
+    public function pushing_an_invalid_value_among_valid_values_throws_an_exception(): void
+    {
+        $sequence = Sequence::make();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid value of type stdClass');
+
+        $sequence->push(3, new stdClass());
     }
 
     #[Test]
@@ -302,15 +330,6 @@ class SequenceTest extends TestCase
         return [
             'key present' => [2, 3],
             'key not present' => [5, null],
-        ];
-    }
-
-    public static function addAllProvider(): array
-    {
-        return [
-            'array' => [[3, 4]],
-            'keyed array' => [['foo' => 3, 9 => 4]],
-            'sequence' => [Sequence::make([3, 4])],
         ];
     }
 

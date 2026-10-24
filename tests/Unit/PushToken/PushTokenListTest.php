@@ -13,13 +13,13 @@ use TypeError;
 class PushTokenListTest extends TestCase
 {
     #[Test]
-    public function add_appends_token_to_collection(): void
+    public function push_appends_token_to_collection(): void
     {
         $collection = new PushTokenList([
             new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
         ]);
 
-        $collection->add(
+        $collection->push(
             new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
         );
 
@@ -425,12 +425,12 @@ class PushTokenListTest extends TestCase
     }
 
     #[Test]
-    public function add_throws_exception_for_invalid_value(): void
+    public function push_throws_exception_for_invalid_value(): void
     {
         $collection = new PushTokenList();
 
         $this->expectException(InvalidArgumentException::class);
 
-        $collection->add('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]');
+        $collection->push('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]');
     }
 }

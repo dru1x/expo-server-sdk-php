@@ -18,11 +18,11 @@ trait MapMethods
     // Setup ----
 
     /**
-     * @param array<TKey, TValue> $items
+     * @param array<TKey, TValue> $values
      */
-    public function __construct(array $items = [])
+    public function __construct(array $values = [])
     {
-        $this->putAll($items);
+        $this->putAll($values);
     }
 
     // Mutators ----
@@ -32,7 +32,7 @@ trait MapMethods
         $this->validateKey($key);
         $this->validateValue($value);
 
-        $this->items[$key] = $value;
+        $this->values[$key] = $value;
     }
 
     public function putAll(Map|array $values): void
@@ -45,14 +45,14 @@ trait MapMethods
     public function merge(Map $other): static
     {
         return new static(
-            array_replace($this->items, $other->toArray()),
+            array_replace($this->values, $other->toArray()),
         );
     }
 
     public function filter(callable $callback): static
     {
         return new static(
-            array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH),
+            array_filter($this->values, $callback, ARRAY_FILTER_USE_BOTH),
         );
     }
 

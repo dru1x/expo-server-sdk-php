@@ -14,13 +14,13 @@ use stdClass;
 class PushErrorListTest extends TestCase
 {
     #[Test]
-    public function add_appends_message_to_collection(): void
+    public function push_appends_message_to_collection(): void
     {
         $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
         ]);
 
-        $collection->add(new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'));
+        $collection->push(new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'));
 
         $this->assertCount(2, $collection);
 
@@ -327,12 +327,12 @@ class PushErrorListTest extends TestCase
     }
 
     #[Test]
-    public function add_throws_exception_for_invalid_value(): void
+    public function push_throws_exception_for_invalid_value(): void
     {
         $collection = new PushErrorList();
 
         $this->expectException(InvalidArgumentException::class);
 
-        $collection->add(new stdClass());
+        $collection->push(new stdClass());
     }
 }

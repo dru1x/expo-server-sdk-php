@@ -15,7 +15,7 @@ use stdClass;
 class PushTicketListTest extends TestCase
 {
     #[Test]
-    public function add_appends_ticket_to_collection(): void
+    public function push_appends_ticket_to_collection(): void
     {
         $collection = new PushTicketList([
             new SuccessfulPushTicket(
@@ -24,7 +24,7 @@ class PushTicketListTest extends TestCase
             ),
         ]);
 
-        $collection->add(
+        $collection->push(
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
                 receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
@@ -501,12 +501,12 @@ class PushTicketListTest extends TestCase
     }
 
     #[Test]
-    public function add_throws_exception_for_invalid_value(): void
+    public function push_throws_exception_for_invalid_value(): void
     {
         $collection = new PushTicketList();
 
         $this->expectException(InvalidArgumentException::class);
 
-        $collection->add(new stdClass());
+        $collection->push(new stdClass());
     }
 }

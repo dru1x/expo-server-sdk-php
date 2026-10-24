@@ -13,18 +13,13 @@ interface Sequence extends Collection
     // Mutators ----
 
     /**
-     * Add a value to the end of this sequence.
+     * Add one or more values to the end of this sequence.
      *
-     * @param TValue $value
-     */
-    public function add(mixed $value): void;
-
-    /**
-     * Add multiple values to the end of this sequence.
+     * @param TValue ...$values
      *
-     * @param Sequence<TKey, TValue>|array<TKey, TValue> $values
+     * @return void
      */
-    public function addAll(self|array $values): void;
+    public function push(mixed ...$values): void;
 
     /**
      * Merge two sequences into one and return the result.
