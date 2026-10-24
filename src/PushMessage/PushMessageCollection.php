@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dru1x\ExpoPush\PushMessage;
 
 use Dru1x\ExpoPush\PushToken\PushToken;
@@ -46,6 +48,7 @@ final class PushMessageCollection implements Collection
      * @param int $size
      *
      * @return array<self>
+     * @throws ValueError If the given size is less than 1
      */
     public function chunkByNotifications(int $size): array
     {
