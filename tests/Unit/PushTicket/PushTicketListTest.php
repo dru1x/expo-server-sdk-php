@@ -2,28 +2,29 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushTicket;
 
-use ArrayIterator;
 use Dru1x\ExpoPush\PushTicket\PushTicket;
-use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
+use Dru1x\ExpoPush\PushTicket\PushTicketList;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
 use Dru1x\ExpoPush\PushToken\PushToken;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Traversable;
+use stdClass;
 
-class PushTicketCollectionTest extends TestCase
+class PushTicketListTest extends TestCase
 {
     #[Test]
-    public function add_appends_ticket_to_collection(): void
+    public function push_appends_ticket_to_collection(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             ),
-        );
+        ]);
 
-        $collection->add(
+        $collection->push(
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
                 receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
@@ -42,53 +43,9 @@ class PushTicketCollectionTest extends TestCase
     }
 
     #[Test]
-    public function set_inserts_ticket_to_collection_at_index(): void
-    {
-        $collection = new PushTicketCollection();
-
-        $setTicket = new SuccessfulPushTicket(
-            token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-            receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-        );
-
-        $collection->set(9, $setTicket);
-
-        $this->assertCount(1, $collection);
-        $this->assertNull($collection->get(0));
-
-        $getTicket = $collection->get(9);
-        $this->assertInstanceOf(SuccessfulPushTicket::class, $getTicket);
-        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $getTicket->receiptId);
-    }
-
-    #[Test]
-    public function set_replaces_ticket_in_collection_at_index(): void
-    {
-        $collection = new PushTicketCollection(
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            ),
-        );
-
-        $setTicket = new SuccessfulPushTicket(
-            token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-            receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-        );
-
-        $collection->set(0, $setTicket);
-
-        $this->assertCount(1, $collection);
-
-        $getTicket = $collection->get(0);
-        $this->assertInstanceOf(SuccessfulPushTicket::class, $getTicket);
-        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $getTicket->receiptId);
-    }
-
-    #[Test]
     public function merge_returns_single_combined_collection(): void
     {
-        $collection1 = new PushTicketCollection(
+        $collection1 = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -101,9 +58,9 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
             ),
-        );
+        ]);
 
-        $collection2 = new PushTicketCollection(
+        $collection2 = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
                 receiptId: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
@@ -116,7 +73,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
                 receiptId: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
             ),
-        );
+        ]);
 
         $mergedCollection = $collection1->merge($collection2);
 
@@ -132,7 +89,7 @@ class PushTicketCollectionTest extends TestCase
     #[Test]
     public function collection_is_iterable(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -145,7 +102,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
             ),
-        );
+        ]);
 
         foreach ($collection as $ticket) {
             $this->assertInstanceOf(PushTicket::class, $ticket);
@@ -168,7 +125,7 @@ class PushTicketCollectionTest extends TestCase
             receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         );
 
-        $collection = new PushTicketCollection($ticket1, $ticket2, $ticket3);
+        $collection = new PushTicketList([$ticket1, $ticket2, $ticket3]);
 
         $this->assertTrue($collection->contains($ticket1));
         $this->assertTrue($collection->contains($ticket2));
@@ -190,7 +147,7 @@ class PushTicketCollectionTest extends TestCase
             receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         );
 
-        $collection = new PushTicketCollection($ticket1, $ticket2);
+        $collection = new PushTicketList([$ticket1, $ticket2]);
 
         $this->assertFalse($collection->contains($ticket3));
     }
@@ -207,7 +164,7 @@ class PushTicketCollectionTest extends TestCase
             receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
         );
 
-        $collection = new PushTicketCollection($ticket1, $ticket2);
+        $collection = new PushTicketList([$ticket1, $ticket2]);
 
         $ticket = $collection->get(1);
 
@@ -217,7 +174,7 @@ class PushTicketCollectionTest extends TestCase
     #[Test]
     public function get_returns_null_if_push_ticket_not_found(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -226,7 +183,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
                 receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             ),
-        );
+        ]);
 
         $ticket = $collection->get(99);
 
@@ -236,7 +193,7 @@ class PushTicketCollectionTest extends TestCase
     #[Test]
     public function count_returns_correct_push_ticket_count(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -249,7 +206,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
             ),
-        );
+        ]);
 
         $this->assertCount(3, $collection);
     }
@@ -257,7 +214,7 @@ class PushTicketCollectionTest extends TestCase
     #[Test]
     public function chunk_returns_correctly_sized_chunks(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -282,7 +239,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
                 receiptId: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
             ),
-        );
+        ]);
 
         $chunks = $collection->chunk(2);
 
@@ -296,7 +253,7 @@ class PushTicketCollectionTest extends TestCase
     #[Test]
     public function filter_returns_correctly_filtered_collection(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -321,20 +278,21 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
                 receiptId: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
             ),
-        );
+        ]);
 
         $filteredCollection = $collection->filter(
             fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
         );
 
         $this->assertCount(5, $filteredCollection);
-        $this->assertNull($filteredCollection->get(2));
+        $this->assertSame(range(0, 4), array_keys($filteredCollection->toArray()));
+        $this->assertSame($collection->get(3), $filteredCollection->get(2));
     }
 
     #[Test]
     public function filter_does_not_affect_original_collection(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -359,7 +317,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
                 receiptId: 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
             ),
-        );
+        ]);
 
         $collection->filter(
             fn(SuccessfulPushTicket $ticket) => $ticket->receiptId !== 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
@@ -369,29 +327,9 @@ class PushTicketCollectionTest extends TestCase
     }
 
     #[Test]
-    public function values_returns_collection_with_consecutive_keys(): void
-    {
-        $collection = new PushTicketCollection(
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            ),
-        );
-
-        $collection->set(9, new SuccessfulPushTicket(
-            token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-            receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-        ));
-
-        $newCollection = $collection->values();
-
-        $this->assertIsList($newCollection->toArray());
-    }
-
-    #[Test]
     public function to_array_returns_push_ticket_array(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -404,7 +342,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
             ),
-        );
+        ]);
 
         $array = $collection->toArray();
 
@@ -419,7 +357,7 @@ class PushTicketCollectionTest extends TestCase
     #[Test]
     public function json_encode_returns_valid_json_string(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -432,7 +370,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
             ),
-        );
+        ]);
 
         $expectedJson = <<<JSON
             [
@@ -460,7 +398,7 @@ class PushTicketCollectionTest extends TestCase
     #[Test]
     public function to_json_returns_valid_json_string(): void
     {
-        $collection = new PushTicketCollection(
+        $collection = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -473,7 +411,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
             ),
-        );
+        ]);
 
         $expectedJson = <<<JSON
             [
@@ -499,90 +437,9 @@ class PushTicketCollectionTest extends TestCase
     }
 
     #[Test]
-    public function can_merge_a_collection_with_provided_iterables(): void
-    {
-        $collection = PushTicketCollection::make()
-            ->add(new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            ))
-            ->merge(
-                new ArrayIterator([
-                    new SuccessfulPushTicket(
-                        token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-                        receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-                    ),
-                    new SuccessfulPushTicket(
-                        token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
-                        receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-                    ),
-                ]),
-                new ArrayIterator([
-                    new SuccessfulPushTicket(
-                        token: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
-                        receiptId: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA',
-                    ),
-                    new SuccessfulPushTicket(
-                        token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
-                        receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB',
-                    ),
-                ]),
-            );
-
-        $this->assertEquals([
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-                receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
-                receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
-                receiptId: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
-                receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB',
-            ),
-        ], $collection->all());
-    }
-
-    #[Test]
-    public function can_retrieve_all_items_from_a_collection(): void
-    {
-        $collection = PushTicketCollection::make(
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
-                receiptId: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
-                receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB',
-            ),
-        );
-
-        $this->assertEquals([
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
-                receiptId: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
-                receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB',
-            ),
-        ], $collection->all());
-    }
-
-    #[Test]
     public function can_create_an_iterator_from_a_collection(): void
     {
-        $collection = PushTicketCollection::make(
+        $collection = PushTicketList::make([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
                 receiptId: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA',
@@ -591,7 +448,7 @@ class PushTicketCollectionTest extends TestCase
                 token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
                 receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB',
             ),
-        );
+        ]);
 
         $iterator = $collection->getIterator();
 
@@ -617,14 +474,14 @@ class PushTicketCollectionTest extends TestCase
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = new PushTicketCollection();
+        $empty = new PushTicketList();
 
-        $notEmpty = new PushTicketCollection(
+        $notEmpty = new PushTicketList([
             new SuccessfulPushTicket(
                 token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
                 receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB',
             ),
-        );
+        ]);
 
         $this->assertTrue(
             $empty->isEmpty(),
@@ -636,36 +493,20 @@ class PushTicketCollectionTest extends TestCase
     }
 
     #[Test]
-    public function reject_returns_correctly_filtered_collection(): void
+    public function constructor_throws_exception_for_invalid_value(): void
     {
-        $collection = new PushTicketCollection(
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-                receiptId: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
-                receiptId: 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
-                receiptId: 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA',
-            ),
-            new SuccessfulPushTicket(
-                token: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
-                receiptId: 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB',
-            ),
-        );
+        $this->expectException(InvalidArgumentException::class);
 
-        $filteredCollection = $collection->reject(
-            fn(SuccessfulPushTicket $ticket) => $ticket->token->value === 'ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]',
-        );
+        new PushTicketList([new SuccessfulPushTicket(token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), receiptId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'), new stdClass()]);
+    }
 
-        $this->assertCount(4, $filteredCollection);
-        $this->assertNull($filteredCollection->get(4));
+    #[Test]
+    public function push_throws_exception_for_invalid_value(): void
+    {
+        $collection = new PushTicketList();
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $collection->push(new stdClass());
     }
 }

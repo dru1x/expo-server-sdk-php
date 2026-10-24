@@ -6,7 +6,7 @@ namespace Dru1x\ExpoPush\Tests\Unit\Request;
 
 use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
-use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
+use Dru1x\ExpoPush\PushMessage\PushMessageList;
 use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
 use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
@@ -49,7 +49,7 @@ class SendNotificationsRequestTest extends TestCase
         ));
 
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(...$pushMessages),
+            new PushMessageList($pushMessages),
         );
 
         $this->mockClient->addResponse(MockResponse::make());
@@ -72,7 +72,7 @@ class SendNotificationsRequestTest extends TestCase
         ));
 
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(...$pushMessages),
+            new PushMessageList($pushMessages),
         );
 
         $this->mockClient->addResponse(MockResponse::make());
@@ -88,7 +88,7 @@ class SendNotificationsRequestTest extends TestCase
         $contentBytes = SendNotificationsRequest::MAX_MESSAGE_DATA_BYTES + 2;
         $content      = bin2hex(random_bytes($contentBytes / 2));
 
-        $messages = new PushMessageCollection(
+        $messages = new PushMessageList([
             new PushMessage(
                 to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 title: 'Test Notification 1',
@@ -104,7 +104,7 @@ class SendNotificationsRequestTest extends TestCase
                     'content' => $content,
                 ],
             ),
-        );
+        ]);
 
         $request = new SendNotificationsRequest($messages);
 
@@ -117,11 +117,11 @@ class SendNotificationsRequestTest extends TestCase
     public function create_dto_from_response_returns_push_ticket_collection(): void
     {
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(
+            new PushMessageList([
                 new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]')),
                 new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]')),
                 new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]')),
-            ),
+            ]),
         );
 
         $this->mockClient->addResponses([
@@ -172,9 +172,9 @@ class SendNotificationsRequestTest extends TestCase
     public function create_dto_from_response_maps_unrecognized_error_code_to_unknown(): void
     {
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(
+            new PushMessageList([
                 new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]')),
-            ),
+            ]),
         );
 
         $this->mockClient->addResponses([
@@ -208,7 +208,7 @@ class SendNotificationsRequestTest extends TestCase
     public function create_dto_from_response_throws_exception_when_body_cannot_be_decoded(): void
     {
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(),
+            new PushMessageList(),
         );
 
         $this->mockClient->addResponses([
@@ -242,7 +242,7 @@ class SendNotificationsRequestTest extends TestCase
         }
 
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(...$messages),
+            new PushMessageList($messages),
         );
 
         $this->expectException(OverflowException::class);
@@ -255,7 +255,7 @@ class SendNotificationsRequestTest extends TestCase
     {
         $content = random_bytes(100);
 
-        $messages = new PushMessageCollection(
+        $messages = new PushMessageList([
             new PushMessage(
                 to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 title: 'Test Notification 1',
@@ -271,7 +271,7 @@ class SendNotificationsRequestTest extends TestCase
                     'content' => $content,
                 ],
             ),
-        );
+        ]);
 
         $request = new SendNotificationsRequest($messages);
 
@@ -284,7 +284,7 @@ class SendNotificationsRequestTest extends TestCase
     public function body_sets_expected_json_flags(): void
     {
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(),
+            new PushMessageList(),
         );
 
         $this->assertSame(
@@ -297,12 +297,12 @@ class SendNotificationsRequestTest extends TestCase
     public function body_does_not_escape_slashes(): void
     {
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(
+            new PushMessageList([
                 new PushMessage(
                     to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                     title: 'https://example.com',
                 ),
-            ),
+            ]),
         );
 
         $json = (string) $request->body();
@@ -315,12 +315,12 @@ class SendNotificationsRequestTest extends TestCase
     public function body_does_not_escape_unicode_characters(): void
     {
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(
+            new PushMessageList([
                 new PushMessage(
                     to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                     title: 'café 🎉',
                 ),
-            ),
+            ]),
         );
 
         $json = (string) $request->body();
@@ -333,12 +333,12 @@ class SendNotificationsRequestTest extends TestCase
     public function body_throws_json_exception_when_data_contains_invalid_utf8(): void
     {
         $request = new SendNotificationsRequest(
-            new PushMessageCollection(
+            new PushMessageList([
                 new PushMessage(
                     to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                     title: "\xB1\x31",
                 ),
-            ),
+            ]),
         );
 
         $this->expectException(JsonException::class);

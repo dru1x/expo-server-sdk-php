@@ -2,11 +2,11 @@
 
 namespace Dru1x\ExpoPush\Support;
 
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
 
 abstract readonly class Result
 {
-    public function __construct(public PushErrorCollection $errors) {}
+    public function __construct(public PushErrorList $errors) {}
 
     // Helpers ----
 

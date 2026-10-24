@@ -7,7 +7,7 @@ use Dru1x\ExpoPush\ExpoPush;
 use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
-use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
+use Dru1x\ExpoPush\PushMessage\PushMessageList;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Request\SendNotificationsRequest;
 use GuzzleHttp\Handler\MockHandler;
@@ -182,7 +182,7 @@ class RequestRetryTest extends TestCase
         $connector->withMockClient($this->mockClient);
 
         try {
-            $connector->sendAsync(new SendNotificationsRequest(new PushMessageCollection($this->makeMessage())), $this->mockClient)->wait();
+            $connector->sendAsync(new SendNotificationsRequest(new PushMessageList([$this->makeMessage()])), $this->mockClient)->wait();
             $this->fail('Expected a RequestException to be thrown.');
         } catch (RequestException) {
             // Expected - handleRetry() vetoed the retry
@@ -223,7 +223,7 @@ class RequestRetryTest extends TestCase
             }
         };
 
-        $request = new SendNotificationsRequest(new PushMessageCollection($this->makeMessage()));
+        $request = new SendNotificationsRequest(new PushMessageList([$this->makeMessage()]));
 
         $connector->sendAsync($request)->wait();
 

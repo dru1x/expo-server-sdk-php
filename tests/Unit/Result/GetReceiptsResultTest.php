@@ -4,12 +4,12 @@ namespace Dru1x\ExpoPush\Tests\Unit\Result;
 
 use Dru1x\ExpoPush\PushError\PushError;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
 use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceipt;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptDetails;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptErrorCode;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptMap;
 use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Result\GetReceiptsResult;
@@ -23,13 +23,13 @@ class GetReceiptsResultTest extends TestCase
     public function has_errors_returns_true_when_errors_are_present(): void
     {
         $result = new GetReceiptsResult(
-            receipts: new PushReceiptCollection(),
-            errors: new PushErrorCollection(
+            receipts: new PushReceiptMap(),
+            errors: new PushErrorList([
                 new PushError(
                     code: PushErrorCode::Failed,
                     message: 'Failed to get push receipts',
                 ),
-            ),
+            ]),
         );
 
         $this->assertTrue($result->hasErrors());
@@ -39,8 +39,8 @@ class GetReceiptsResultTest extends TestCase
     public function has_errors_returns_false_when_errors_are_not_present(): void
     {
         $result = new GetReceiptsResult(
-            receipts: new PushReceiptCollection(),
-            errors: new PushErrorCollection(),
+            receipts: new PushReceiptMap(),
+            errors: new PushErrorList(),
         );
 
         $this->assertFalse($result->hasErrors());
@@ -50,10 +50,10 @@ class GetReceiptsResultTest extends TestCase
     public function has_receipts_returns_true_when_receipts_are_present(): void
     {
         $result = new GetReceiptsResult(
-            receipts: new PushReceiptCollection(
-                new SuccessfulPushReceipt('receipt-1'),
-            ),
-            errors: new PushErrorCollection(),
+            receipts: new PushReceiptMap([
+                'receipt-1' => new SuccessfulPushReceipt('receipt-1'),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertTrue($result->hasReceipts());
@@ -63,8 +63,8 @@ class GetReceiptsResultTest extends TestCase
     public function has_receipts_returns_true_when_receipts_are_not_present(): void
     {
         $result = new GetReceiptsResult(
-            receipts: new PushReceiptCollection(),
-            errors: new PushErrorCollection(),
+            receipts: new PushReceiptMap(),
+            errors: new PushErrorList(),
         );
 
         $this->assertFalse($result->hasReceipts());
@@ -74,10 +74,10 @@ class GetReceiptsResultTest extends TestCase
     public function has_successful_receipts_returns_true_when_successful_receipts_are_present(): void
     {
         $result = new GetReceiptsResult(
-            receipts: new PushReceiptCollection(
-                new SuccessfulPushReceipt('receipt-1'),
-            ),
-            errors: new PushErrorCollection(),
+            receipts: new PushReceiptMap([
+                'receipt-1' => new SuccessfulPushReceipt('receipt-1'),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertTrue($result->hasSuccessfulReceipts());
@@ -87,13 +87,13 @@ class GetReceiptsResultTest extends TestCase
     public function has_successful_receipts_returns_true_when_successful_receipts_are_not_present(): void
     {
         $result = new GetReceiptsResult(
-            receipts: new PushReceiptCollection(
-                new FailedPushReceipt('receipt-1', 'Unknown error', new PushReceiptDetails(
+            receipts: new PushReceiptMap([
+                'receipt-1' => new FailedPushReceipt('receipt-1', 'Unknown error', new PushReceiptDetails(
                     error: PushReceiptErrorCode::Unknown,
                     expoPushToken: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 )),
-            ),
-            errors: new PushErrorCollection(),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertFalse($result->hasSuccessfulReceipts());
@@ -103,13 +103,13 @@ class GetReceiptsResultTest extends TestCase
     public function has_failed_receipts_returns_true_when_failed_receipts_are_present(): void
     {
         $result = new GetReceiptsResult(
-            receipts: new PushReceiptCollection(
-                new FailedPushReceipt('receipt-1', 'Unknown error', new PushReceiptDetails(
+            receipts: new PushReceiptMap([
+                'receipt-1' => new FailedPushReceipt('receipt-1', 'Unknown error', new PushReceiptDetails(
                     error: PushReceiptErrorCode::Unknown,
                     expoPushToken: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 )),
-            ),
-            errors: new PushErrorCollection(),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertTrue($result->hasFailedReceipts());
@@ -119,10 +119,10 @@ class GetReceiptsResultTest extends TestCase
     public function has_failed_receipts_returns_true_when_failed_receipts_are_not_present(): void
     {
         $result = new GetReceiptsResult(
-            receipts: new PushReceiptCollection(
-                new SuccessfulPushReceipt('receipt-1'),
-            ),
-            errors: new PushErrorCollection(),
+            receipts: new PushReceiptMap([
+                'receipt-1' => new SuccessfulPushReceipt('receipt-1'),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertFalse($result->hasFailedReceipts());

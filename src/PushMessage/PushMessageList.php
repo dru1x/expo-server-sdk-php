@@ -2,26 +2,20 @@
 
 namespace Dru1x\ExpoPush\PushMessage;
 
-use Dru1x\ExpoPush\PushToken\PushToken;
-use Dru1x\ExpoPush\PushToken\PushTokenCollection;
-use Dru1x\ExpoPush\Support\Collection;
-use Dru1x\ExpoPush\Support\CollectionMethods;
+use Dru1x\ExpoPush\PushToken\PushTokenList;
+use Dru1x\ExpoPush\Support\Sequence;
+use Dru1x\ExpoPush\Support\SequenceMethods;
 use ValueError;
 
 /**
  * A collection of PushMessage objects
  *
- * @implements Collection<int, PushMessage>
+ * @implements Sequence<PushMessage>
  */
-final class PushMessageCollection implements Collection
+final class PushMessageList implements Sequence
 {
-    /** @use CollectionMethods<int, PushMessage> */
-    use CollectionMethods;
-
-    public function __construct(PushMessage ...$pushMessages)
-    {
-        $this->items = $pushMessages;
-    }
+    /** @use SequenceMethods<PushMessage> */
+    use SequenceMethods;
 
     /**
      * Count the number of notifications that would be sent by this set of PushMessages
@@ -33,7 +27,7 @@ final class PushMessageCollection implements Collection
      */
     public function notificationCount(): int
     {
-        return array_reduce($this->items, fn(int $count, PushMessage $message) => $count + $message->tokenCount(), 0);
+        return array_reduce($this->values, fn(int $count, PushMessage $message) => $count + $message->tokenCount(), 0);
     }
 
     /**
@@ -60,7 +54,7 @@ final class PushMessageCollection implements Collection
         $currentChunk = new self();
         $allChunks    = [$currentChunk];
 
-        foreach ($this->items as $pushMessage) {
+        foreach ($this->values as $pushMessage) {
 
             // Calculate how much notification space is left in the current chunk
             $currentChunkCapacity = $this->ensureChunkHasCapacity($size, $currentChunk, $allChunks);
@@ -70,7 +64,7 @@ final class PushMessageCollection implements Collection
 
             // If the current message will fit in the current chunk, add it now and move on to the next one
             if ($currentChunkCapacity >= $notificationCount) {
-                $currentChunk->add($pushMessage);
+                $currentChunk->push($pushMessage);
                 continue;
             }
 
@@ -84,7 +78,7 @@ final class PushMessageCollection implements Collection
                 $currentChunkCapacity = $this->ensureChunkHasCapacity($size, $currentChunk, $allChunks);
 
                 // Take as many tokens as will fit in the chunk, add them to a message copy, and add it to the chunk
-                $currentChunk->add(
+                $currentChunk->push(
                     $pushMessage->copy(to: $recipientTokens->shift($currentChunkCapacity)),
                 );
             }
@@ -96,20 +90,24 @@ final class PushMessageCollection implements Collection
     /**
      * Get an ordered collection of all push tokens used by the push messages in this collection
      *
-     * @return PushTokenCollection
+     * @return PushTokenList
      */
-    public function getTokens(): PushTokenCollection
+    public function getTokens(): PushTokenList
     {
         $tokens = [];
 
-        foreach ($this->items as $message) {
-            $tokens[] = $message->allTokens()->all();
+        foreach ($this->values as $message) {
+            $tokens[] = $message->allTokens()->toArray();
         }
 
-        return new PushTokenCollection(...array_merge(...$tokens));
+        return new PushTokenList(array_merge(...$tokens));
     }
 
     // Internals ----
+    protected function valueIsValid(mixed $value): bool
+    {
+        return $value instanceof PushMessage;
+    }
 
     /**
      * Calculates the amount of space remaining in a chunk of PushMessages.

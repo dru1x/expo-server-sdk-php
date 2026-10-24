@@ -2,29 +2,30 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushMessage;
 
-use ArrayIterator;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
-use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
+use Dru1x\ExpoPush\PushMessage\PushMessageList;
 use Dru1x\ExpoPush\PushToken\PushToken;
-use Dru1x\ExpoPush\PushToken\PushTokenCollection;
+use Dru1x\ExpoPush\PushToken\PushTokenList;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Traversable;
 use ValueError;
+use stdClass;
 
-class PushMessageCollectionTest extends TestCase
+class PushMessageListTest extends TestCase
 {
     #[Test]
-    public function add_appends_message_to_collection(): void
+    public function push_appends_message_to_collection(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(
                 to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 title: 'Test Notification 1',
             ),
-        );
+        ]);
 
-        $collection->add(new PushMessage(
+        $collection->push(new PushMessage(
             to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
             title: 'Test Notification 2',
         ));
@@ -39,62 +40,23 @@ class PushMessageCollectionTest extends TestCase
     }
 
     #[Test]
-    public function set_inserts_message_to_collection_at_index(): void
-    {
-        $collection = new PushMessageCollection();
-
-        $collection->set(9, new PushMessage(
-            to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-            title: 'Test Notification 9',
-        ));
-
-        $this->assertCount(1, $collection);
-
-        $this->assertNull($collection->get(0));
-
-        $this->assertEquals('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]', $collection->get(9)->to->toString());
-        $this->assertEquals('Test Notification 9', $collection->get(9)->title);
-    }
-
-    #[Test]
-    public function set_replaces_message_in_collection_at_index(): void
-    {
-        $collection = new PushMessageCollection(
-            new PushMessage(
-                to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                title: 'Test Notification 1',
-            ),
-        );
-
-        $collection->set(0, new PushMessage(
-            to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-            title: 'Test Notification 2',
-        ));
-
-        $this->assertCount(1, $collection);
-
-        $this->assertEquals('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]', $collection->get(0)->to->toString());
-        $this->assertEquals('Test Notification 2', $collection->get(0)->title);
-    }
-
-    #[Test]
     public function notification_count_correctly_counts_resultant_notifications(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
             new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
             new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-            new PushMessage(to: new PushTokenCollection(
+            new PushMessage(to: new PushTokenList([
                 new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
                 new PushToken('ExponentPushToken[dddddddddddddddddddddd]'),
                 new PushToken('ExponentPushToken[eeeeeeeeeeeeeeeeeeeeee]'),
                 new PushToken('ExponentPushToken[ffffffffffffffffffffff]'),
                 new PushToken('ExponentPushToken[gggggggggggggggggggggg]'),
                 new PushToken('ExponentPushToken[hhhhhhhhhhhhhhhhhhhhhh]'),
-            ), title: 'Test Notification 6'),
-        );
+            ]), title: 'Test Notification 6'),
+        ]);
 
         $count = $collection->notificationCount();
 
@@ -104,21 +66,21 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function chunk_by_notifications_correctly_splits_up_push_messages(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
             new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
             new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-            new PushMessage(to: new PushTokenCollection(
+            new PushMessage(to: new PushTokenList([
                 new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
                 new PushToken('ExponentPushToken[dddddddddddddddddddddd]'),
                 new PushToken('ExponentPushToken[eeeeeeeeeeeeeeeeeeeeee]'),
                 new PushToken('ExponentPushToken[ffffffffffffffffffffff]'),
                 new PushToken('ExponentPushToken[gggggggggggggggggggggg]'),
                 new PushToken('ExponentPushToken[hhhhhhhhhhhhhhhhhhhhhh]'),
-            ), title: 'Test Notification 6'),
-        );
+            ]), title: 'Test Notification 6'),
+        ]);
 
         $chunks = $collection->chunkByNotifications(3);
 
@@ -146,7 +108,7 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function chunk_by_notifications_returns_empty_array_for_empty_collection(): void
     {
-        $collection = new PushMessageCollection();
+        $collection = new PushMessageList();
 
         $chunks = $collection->chunkByNotifications(3);
 
@@ -156,13 +118,13 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function chunk_by_notifications_does_not_split_multi_token_message_that_fits_in_chunk(): void
     {
-        $collection = new PushMessageCollection(
-            new PushMessage(to: new PushTokenCollection(
+        $collection = new PushMessageList([
+            new PushMessage(to: new PushTokenList([
                 new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
                 new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
-            ), title: 'Test Notification'),
-        );
+            ]), title: 'Test Notification'),
+        ]);
 
         $chunks = $collection->chunkByNotifications(3);
 
@@ -174,15 +136,15 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function chunk_by_notifications_splits_standalone_multi_token_message_across_chunks(): void
     {
-        $collection = new PushMessageCollection(
-            new PushMessage(to: new PushTokenCollection(
+        $collection = new PushMessageList([
+            new PushMessage(to: new PushTokenList([
                 new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
                 new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
                 new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'),
-            ), title: 'Test Notification'),
-        );
+            ]), title: 'Test Notification'),
+        ]);
 
         $chunks = $collection->chunkByNotifications(2);
 
@@ -201,14 +163,14 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function chunk_by_notifications_preserves_token_order_when_splitting(): void
     {
-        $collection = new PushMessageCollection(
-            new PushMessage(to: new PushTokenCollection(
+        $collection = new PushMessageList([
+            new PushMessage(to: new PushTokenList([
                 new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
                 new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
                 new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'),
-            ), title: 'Test Notification'),
-        );
+            ]), title: 'Test Notification'),
+        ]);
 
         $chunks = $collection->chunkByNotifications(2);
 
@@ -226,13 +188,13 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function chunk_by_notifications_with_size_one_puts_each_token_in_its_own_chunk(): void
     {
-        $collection = new PushMessageCollection(
-            new PushMessage(to: new PushTokenCollection(
+        $collection = new PushMessageList([
+            new PushMessage(to: new PushTokenList([
                 new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
                 new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
-            ), title: 'Test Notification'),
-        );
+            ]), title: 'Test Notification'),
+        ]);
 
         $chunks = $collection->chunkByNotifications(1);
 
@@ -247,13 +209,13 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function chunk_by_notifications_throws_exception_if_size_is_less_than_one(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
             new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
             new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-        );
+        ]);
 
         $this->expectException(ValueError::class);
 
@@ -263,32 +225,33 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function filter_returns_correctly_filtered_collection(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
             new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
             new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-        );
+        ]);
 
         $filteredCollection = $collection->filter(
             fn(PushMessage $message) => $message->to->value !== 'ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]',
         );
 
         $this->assertCount(4, $filteredCollection);
-        $this->assertNull($filteredCollection->get(3));
+        $this->assertSame(range(0, 3), array_keys($filteredCollection->toArray()));
+        $this->assertSame($collection->get(4), $filteredCollection->get(3));
     }
 
     #[Test]
     public function filter_does_not_affect_original_collection(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
             new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
             new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-        );
+        ]);
 
         $collection->filter(
             fn(PushMessage $message) => $message->to->value !== 'ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]',
@@ -300,21 +263,21 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function get_push_tokens_returns_correctly_ordered_push_token_collection(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
             new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
             new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-            new PushMessage(to: new PushTokenCollection(
+            new PushMessage(to: new PushTokenList([
                 new PushToken('ExponentPushToken[cccccccccccccccccccccc]'),
                 new PushToken('ExponentPushToken[dddddddddddddddddddddd]'),
                 new PushToken('ExponentPushToken[eeeeeeeeeeeeeeeeeeeeee]'),
                 new PushToken('ExponentPushToken[ffffffffffffffffffffff]'),
                 new PushToken('ExponentPushToken[gggggggggggggggggggggg]'),
                 new PushToken('ExponentPushToken[hhhhhhhhhhhhhhhhhhhhhh]'),
-            ), title: 'Test Notification 6'),
-        );
+            ]), title: 'Test Notification 6'),
+        ]);
 
         $tokens = $collection->getTokens();
 
@@ -336,11 +299,11 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function collection_is_iterable(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
-        );
+        ]);
 
         foreach ($collection as $message) {
             $this->assertInstanceOf(PushMessage::class, $message);
@@ -353,7 +316,7 @@ class PushMessageCollectionTest extends TestCase
         $message1 = new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1');
         $message2 = new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2');
 
-        $collection = new PushMessageCollection($message1, $message2);
+        $collection = new PushMessageList([$message1, $message2]);
 
         $this->assertTrue($collection->contains($message1));
         $this->assertTrue($collection->contains($message2));
@@ -366,7 +329,7 @@ class PushMessageCollectionTest extends TestCase
         $message2 = new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2');
         $message3 = new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3');
 
-        $collection = new PushMessageCollection($message1, $message2);
+        $collection = new PushMessageList([$message1, $message2]);
 
         $this->assertFalse($collection->contains($message3));
     }
@@ -377,7 +340,7 @@ class PushMessageCollectionTest extends TestCase
         $message1 = new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1');
         $message2 = new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2');
 
-        $collection = new PushMessageCollection($message1, $message2);
+        $collection = new PushMessageList([$message1, $message2]);
 
         $message = $collection->get(1);
 
@@ -387,10 +350,10 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function get_returns_null_if_push_message_not_found(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
-        );
+        ]);
 
         $message = $collection->get(99);
 
@@ -400,11 +363,11 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function count_returns_correct_push_message_count(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
-        );
+        ]);
 
         $this->assertCount(3, $collection);
     }
@@ -412,14 +375,14 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function chunk_returns_correctly_sized_chunks(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
             new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
             new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
             new PushMessage(to: new PushToken('ExponentPushToken[cccccccccccccccccccccc]'), title: 'Test Notification 6'),
-        );
+        ]);
 
         $chunks = $collection->chunk(2);
 
@@ -431,33 +394,13 @@ class PushMessageCollectionTest extends TestCase
     }
 
     #[Test]
-    public function values_returns_collection_with_consecutive_keys(): void
-    {
-        $collection = new PushMessageCollection(
-            new PushMessage(
-                to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
-                title: 'Test Notification 1',
-            ),
-        );
-
-        $collection->set(9, new PushMessage(
-            to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
-            title: 'Test Notification 2',
-        ));
-
-        $newCollection = $collection->values();
-
-        $this->assertIsList($newCollection->toArray());
-    }
-
-    #[Test]
     public function to_array_returns_push_message_array(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
-        );
+        ]);
 
         $array = $collection->toArray();
 
@@ -472,11 +415,11 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function json_encode_returns_valid_json_string(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
-        );
+        ]);
 
         $expectedJson = <<<JSON
             [
@@ -501,11 +444,11 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function to_json_returns_valid_json_string(): void
     {
-        $collection = new PushMessageCollection(
+        $collection = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
-        );
+        ]);
 
         $expectedJson = <<<JSON
             [
@@ -528,20 +471,18 @@ class PushMessageCollectionTest extends TestCase
     }
 
     #[Test]
-    public function can_merge_a_collection_with_provided_iterables(): void
+    public function merge_returns_a_new_list_with_values_from_both_lists(): void
     {
-        $collection = PushMessageCollection::make()
-            ->add(new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'))
-            ->merge(
-                new ArrayIterator([
-                    new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
-                    new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
-                ]),
-                new ArrayIterator([
-                    new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
-                    new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-                ]),
-            );
+        $collection = new PushMessageList([
+            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
+        ]);
+
+        $merged = $collection->merge(new PushMessageList([
+            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
+            new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
+            new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
+            new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
+        ]));
 
         $this->assertEquals([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
@@ -549,30 +490,18 @@ class PushMessageCollectionTest extends TestCase
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
             new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
             new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-        ], $collection->all());
-    }
+        ], $merged->toArray());
 
-    #[Test]
-    public function can_retrieve_all_items_from_a_collection(): void
-    {
-        $collection = PushMessageCollection::make(
-            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
-            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
-        );
-
-        $this->assertEquals([
-            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
-            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
-        ], $collection->all());
+        $this->assertCount(1, $collection);
     }
 
     #[Test]
     public function can_create_an_iterator_from_a_collection(): void
     {
-        $collection = PushMessageCollection::make(
+        $collection = PushMessageList::make([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
-        );
+        ]);
 
         $iterator = $collection->getIterator();
 
@@ -592,11 +521,11 @@ class PushMessageCollectionTest extends TestCase
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = new PushMessageCollection();
+        $empty = new PushMessageList();
 
-        $notEmpty = new PushMessageCollection(
+        $notEmpty = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
-        );
+        ]);
 
         $this->assertTrue(
             $empty->isEmpty(),
@@ -608,21 +537,20 @@ class PushMessageCollectionTest extends TestCase
     }
 
     #[Test]
-    public function reject_returns_correctly_filtered_collection(): void
+    public function constructor_throws_exception_for_invalid_value(): void
     {
-        $collection = new PushMessageCollection(
-            new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification 1'),
-            new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification 2'),
-            new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification 3'),
-            new PushMessage(to: new PushToken('ExponentPushToken[aaaaaaaaaaaaaaaaaaaaaa]'), title: 'Test Notification 4'),
-            new PushMessage(to: new PushToken('ExponentPushToken[bbbbbbbbbbbbbbbbbbbbbb]'), title: 'Test Notification 5'),
-        );
+        $this->expectException(InvalidArgumentException::class);
 
-        $filteredCollection = $collection->reject(
-            fn(PushMessage $message) => $message->title === 'Test Notification 4',
-        );
+        new PushMessageList([new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]')), new stdClass()]);
+    }
 
-        $this->assertCount(4, $filteredCollection);
-        $this->assertNull($filteredCollection->get(3));
+    #[Test]
+    public function push_throws_exception_for_invalid_value(): void
+    {
+        $collection = new PushMessageList();
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $collection->push(new stdClass());
     }
 }

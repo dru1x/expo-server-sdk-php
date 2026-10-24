@@ -5,7 +5,7 @@
 namespace Dru1x\ExpoPush\Tests\Unit\Request;
 
 use Dru1x\ExpoPush\PushError\PushErrorCode;
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
 use Dru1x\ExpoPush\Request\RequestExceptionHandler;
 use JsonException;
 use PHPUnit\Framework\Attributes\Test;
@@ -18,14 +18,14 @@ use Saloon\RateLimitPlugin\Limit;
 
 class RequestExceptionHandlerTest extends TestCase
 {
-    protected PushErrorCollection $errors;
+    protected PushErrorList $errors;
     protected RequestExceptionHandler $handler;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->errors  = new PushErrorCollection();
+        $this->errors  = new PushErrorList();
         $this->handler = new RequestExceptionHandler(batchSize: 100, totalCount: 1000, errors: $this->errors);
     }
 

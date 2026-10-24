@@ -5,7 +5,7 @@
 use Dru1x\ExpoPush\ExpoPush;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
-use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
+use Dru1x\ExpoPush\PushMessage\PushMessageList;
 use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
 use Dru1x\ExpoPush\PushTicket\PushTicket;
 use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
@@ -56,11 +56,11 @@ class SendNotificationsTest extends TestCase
             ),
         );
 
-        $messages = new PushMessageCollection(
+        $messages = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification'),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'), title: 'Test Notification'),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'), title: 'Test Notification'),
-        );
+        ]);
 
         $result = $this->service->sendNotifications($messages);
 
@@ -175,7 +175,7 @@ class SendNotificationsTest extends TestCase
     #[Test]
     public function send_notifications_does_not_send_requests_for_empty_collection(): void
     {
-        $result = $this->service->sendNotifications(new PushMessageCollection());
+        $result = $this->service->sendNotifications(new PushMessageList());
 
         $this->mockClient->assertSentCount(0, SendNotificationsRequest::class);
 
@@ -226,11 +226,11 @@ class SendNotificationsTest extends TestCase
             MockResponse::make(body: $responseBody, headers: ['Content-Type' => 'application/json']),
         );
 
-        $messages = new PushMessageCollection(
+        $messages = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]')),
             new PushMessage(to: new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]')),
             new PushMessage(to: new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]')),
-        );
+        ]);
 
         $result = $this->service->sendNotifications($messages);
 
@@ -429,9 +429,9 @@ class SendNotificationsTest extends TestCase
             ),
         );
 
-        $messages = new PushMessageCollection(
+        $messages = new PushMessageList([
             new PushMessage(to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'), title: 'Test Notification'),
-        );
+        ]);
 
         $result = $this->service->sendNotifications($messages);
 
@@ -456,7 +456,7 @@ class SendNotificationsTest extends TestCase
         );
     }
 
-    protected function generatePushMessages(int $count): PushMessageCollection
+    protected function generatePushMessages(int $count): PushMessageList
     {
         $messages = [];
 
@@ -464,7 +464,7 @@ class SendNotificationsTest extends TestCase
             $messages[] = $this->generatePushMessage();
         }
 
-        return new PushMessageCollection(...$messages);
+        return new PushMessageList($messages);
     }
 
     protected function generatePushReceiptId(): string

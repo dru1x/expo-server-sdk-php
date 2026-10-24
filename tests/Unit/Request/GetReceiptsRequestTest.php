@@ -7,7 +7,9 @@ namespace Dru1x\ExpoPush\Tests\Unit\Request;
 use Dru1x\ExpoPush\ExpoPushConnector;
 use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptErrorCode;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptIdList;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptMap;
+use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\Request\GetReceiptsRequest;
 use JsonException;
 use OverflowException;
@@ -43,7 +45,7 @@ class GetReceiptsRequestTest extends TestCase
         $receiptIds = array_fill(0, 50, 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
 
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(...$receiptIds),
+            new PushReceiptIdList($receiptIds),
         );
 
         $this->mockClient->addResponse(MockResponse::make());
@@ -63,7 +65,7 @@ class GetReceiptsRequestTest extends TestCase
         $receiptIds = array_fill(0, 5, 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
 
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(...$receiptIds),
+            new PushReceiptIdList($receiptIds),
         );
 
         $this->mockClient->addResponse(MockResponse::make());
@@ -86,7 +88,7 @@ class GetReceiptsRequestTest extends TestCase
         }
 
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(...$pushReceiptIds),
+            new PushReceiptIdList($pushReceiptIds),
         );
 
         $this->expectException(OverflowException::class);
@@ -95,10 +97,10 @@ class GetReceiptsRequestTest extends TestCase
     }
 
     #[Test]
-    public function create_dto_from_response_returns_push_receipt_collection(): void
+    public function create_dto_from_response_returns_push_receipt_map_keyed_by_id(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(),
+            new PushReceiptIdList(),
         );
 
         $this->mockClient->addResponses([
@@ -129,17 +131,24 @@ class GetReceiptsRequestTest extends TestCase
             $this->connector->send($request),
         );
 
+        $this->assertInstanceOf(PushReceiptMap::class, $dto);
         $this->assertCount(3, $dto);
-        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $dto->get(0)->id);
-        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $dto->get(1)->id);
-        $this->assertEquals('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', $dto->get(2)->id);
+
+        $this->assertInstanceOf(SuccessfulPushReceipt::class, $dto->get('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'));
+        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $dto->get('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')->id);
+
+        $this->assertInstanceOf(SuccessfulPushReceipt::class, $dto->get('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY'));
+        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $dto->get('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY')->id);
+
+        $this->assertInstanceOf(FailedPushReceipt::class, $dto->get('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ'));
+        $this->assertEquals('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ', $dto->get('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ')->id);
     }
 
     #[Test]
     public function create_dto_from_response_maps_unrecognized_error_code_to_unknown(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(),
+            new PushReceiptIdList(),
         );
 
         $this->mockClient->addResponses([
@@ -164,7 +173,7 @@ class GetReceiptsRequestTest extends TestCase
             $this->connector->send($request),
         );
 
-        $receipt = $dto->get(0);
+        $receipt = $dto->get('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ');
         $this->assertInstanceOf(FailedPushReceipt::class, $receipt);
         $this->assertEquals(PushReceiptErrorCode::Unknown, $receipt->details->error);
     }
@@ -174,7 +183,7 @@ class GetReceiptsRequestTest extends TestCase
     public function create_dto_from_response_maps_known_error_code(string $expoErrorString, PushReceiptErrorCode $expectedCode): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(),
+            new PushReceiptIdList(),
         );
 
         $this->mockClient->addResponses([
@@ -199,7 +208,7 @@ class GetReceiptsRequestTest extends TestCase
             $this->connector->send($request),
         );
 
-        $receipt = $dto->get(0);
+        $receipt = $dto->get('ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ');
         $this->assertInstanceOf(FailedPushReceipt::class, $receipt);
         $this->assertEquals($expectedCode, $receipt->details->error);
     }
@@ -219,7 +228,7 @@ class GetReceiptsRequestTest extends TestCase
     public function create_dto_from_response_throws_exception_when_body_cannot_be_decoded(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(),
+            new PushReceiptIdList(),
         );
 
         $this->mockClient->addResponses([
@@ -247,7 +256,7 @@ class GetReceiptsRequestTest extends TestCase
         }
 
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(...$receiptIds),
+            new PushReceiptIdList($receiptIds),
         );
 
         $this->expectException(OverflowException::class);
@@ -259,7 +268,7 @@ class GetReceiptsRequestTest extends TestCase
     public function body_sets_expected_json_flags(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection(),
+            new PushReceiptIdList(),
         );
 
         $this->assertSame(
@@ -272,7 +281,7 @@ class GetReceiptsRequestTest extends TestCase
     public function body_does_not_escape_slashes(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection('XXXX/YYYY'),
+            new PushReceiptIdList(['XXXX/YYYY']),
         );
 
         $json = (string) $request->body();
@@ -285,7 +294,7 @@ class GetReceiptsRequestTest extends TestCase
     public function body_does_not_escape_unicode_characters(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection('café-🎉'),
+            new PushReceiptIdList(['café-🎉']),
         );
 
         $json = (string) $request->body();
@@ -298,7 +307,7 @@ class GetReceiptsRequestTest extends TestCase
     public function body_throws_json_exception_when_data_contains_invalid_utf8(): void
     {
         $request = new GetReceiptsRequest(
-            new PushReceiptIdCollection("\xB1\x31"),
+            new PushReceiptIdList(["\xB1\x31"]),
         );
 
         $this->expectException(JsonException::class);
