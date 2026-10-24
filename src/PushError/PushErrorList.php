@@ -8,11 +8,11 @@ use Dru1x\ExpoPush\Support\SequenceMethods;
 /**
  * A collection of PushError objects
  *
- * @implements Sequence<int, PushError>
+ * @implements Sequence<PushError>
  */
 final class PushErrorList implements Sequence
 {
-    /** @use SequenceMethods<int, PushError> */
+    /** @use SequenceMethods<PushError> */
     use SequenceMethods;
 
     // Internals ----

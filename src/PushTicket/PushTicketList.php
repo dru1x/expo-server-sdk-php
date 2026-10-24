@@ -8,11 +8,11 @@ use Dru1x\ExpoPush\Support\SequenceMethods;
 /**
  * A collection of PushTicket objects
  *
- * @implements Sequence<int, PushTicket>
+ * @implements Sequence<PushTicket>
  */
 final class PushTicketList implements Sequence
 {
-    /** @use SequenceMethods<int, PushTicket> */
+    /** @use SequenceMethods<PushTicket> */
     use SequenceMethods;
 
     // Internals ----

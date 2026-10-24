@@ -10,11 +10,11 @@ use ValueError;
 /**
  * A collection of PushMessage objects
  *
- * @implements Sequence<int, PushMessage>
+ * @implements Sequence<PushMessage>
  */
 final class PushMessageList implements Sequence
 {
-    /** @use SequenceMethods<int, PushMessage> */
+    /** @use SequenceMethods<PushMessage> */
     use SequenceMethods;
 
     /**

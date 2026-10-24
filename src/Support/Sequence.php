@@ -3,10 +3,9 @@
 namespace Dru1x\ExpoPush\Support;
 
 /**
- * @template TKey of int
  * @template TValue
  *
- * @template-extends Collection<TKey, TValue>
+ * @template-extends Collection<non-negative-int, TValue>
  */
 interface Sequence extends Collection
 {
@@ -26,7 +25,7 @@ interface Sequence extends Collection
      *
      * This follows the same merging rules as `array_merge`.
      *
-     * @param Sequence<TKey, TValue> $other
+     * @param Sequence<TValue> $other
      *
      * @return static
      */

@@ -9,11 +9,11 @@ use InvalidArgumentException;
 /**
  * A collection of PushToken objects
  *
- * @implements Sequence<int, PushToken>
+ * @implements Sequence<PushToken>
  */
 final class PushTokenList implements Sequence
 {
-    /** @use SequenceMethods<int, PushToken> */
+    /** @use SequenceMethods<PushToken> */
     use SequenceMethods;
 
     /**

@@ -8,11 +8,11 @@ use Dru1x\ExpoPush\Support\SequenceMethods;
 /**
  * A collection of push receipt IDs
  *
- * @implements Sequence<int, string>
+ * @implements Sequence<string>
  */
 final class PushReceiptIdList implements Sequence
 {
-    /** @use SequenceMethods<int, string> */
+    /** @use SequenceMethods<string> */
     use SequenceMethods;
 
     // Internals ----

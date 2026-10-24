@@ -5,12 +5,11 @@ namespace Dru1x\ExpoPush\Support;
 /**
  * Standard sequence methods
  *
- * @template TKey of int
  * @template TValue
  */
 trait SequenceMethods
 {
-    /** @use CollectionMethods<TKey, TValue> */
+    /** @use CollectionMethods<non-negative-int, TValue> */
     use CollectionMethods;
 
     // Setup ----
