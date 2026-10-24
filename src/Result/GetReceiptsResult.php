@@ -2,13 +2,13 @@
 
 namespace Dru1x\ExpoPush\Result;
 
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptMap;
 use Dru1x\ExpoPush\Support\Result;
 
 final readonly class GetReceiptsResult extends Result
 {
-    public function __construct(public PushReceiptCollection $receipts, PushErrorCollection $errors)
+    public function __construct(public PushReceiptMap $receipts, PushErrorList $errors)
     {
         parent::__construct($errors);
     }

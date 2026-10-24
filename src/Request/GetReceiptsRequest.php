@@ -3,10 +3,10 @@
 namespace Dru1x\ExpoPush\Request;
 
 use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptDetails;
 use Dru1x\ExpoPush\PushReceipt\PushReceiptErrorCode;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptIdList;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptMap;
 use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\PushToken\PushToken;
 use Dru1x\ExpoPush\Support\PushStatus;
@@ -29,7 +29,7 @@ final class GetReceiptsRequest extends Request implements HasBody
 
     protected Method $method = Method::POST;
 
-    public function __construct(protected readonly PushReceiptIdCollection $pushReceiptIds) {}
+    public function __construct(protected readonly PushReceiptIdList $pushReceiptIds) {}
 
     public function resolveEndpoint(): string
     {
@@ -43,10 +43,10 @@ final class GetReceiptsRequest extends Request implements HasBody
      *
      * @param Response $response
      *
-     * @return PushReceiptCollection
+     * @return PushReceiptMap Receipts keyed by their ID; receipts that are not yet ready are omitted by Expo
      * @throws UnexpectedValueException If the response body could not be decoded
      */
-    public function createDtoFromResponse(Response $response): PushReceiptCollection
+    public function createDtoFromResponse(Response $response): PushReceiptMap
     {
         try {
             $data = $response->json('data');
@@ -57,14 +57,14 @@ final class GetReceiptsRequest extends Request implements HasBody
             );
         }
 
-        $receipts = new PushReceiptCollection();
+        $receipts = new PushReceiptMap();
 
         foreach ($data as $id => $receiptData) {
 
             // Parse the receipt status
             $status = PushStatus::from($receiptData['status']);
 
-            $receipts->add(match ($status) {
+            $receipts->put($id, match ($status) {
                 PushStatus::Ok    => $this->makeSuccessfulPushReceipt($id),
                 PushStatus::Error => $this->makeFailedPushReceipt($id, $receiptData),
             });
@@ -120,7 +120,7 @@ final class GetReceiptsRequest extends Request implements HasBody
         $this->preventTooManyReceipts();
 
         return [
-            'ids' => $this->pushReceiptIds->all(),
+            'ids' => $this->pushReceiptIds->toArray(),
         ];
     }
 

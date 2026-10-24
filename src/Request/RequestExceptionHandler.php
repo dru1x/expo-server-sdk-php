@@ -4,7 +4,7 @@ namespace Dru1x\ExpoPush\Request;
 
 use Dru1x\ExpoPush\PushError\PushError;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
 use JsonException;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
@@ -12,7 +12,7 @@ use Saloon\RateLimitPlugin\Exceptions\RateLimitReachedException;
 
 final class RequestExceptionHandler
 {
-    public function __construct(protected int $batchSize, protected int $totalCount, protected PushErrorCollection $errors) {}
+    public function __construct(protected int $batchSize, protected int $totalCount, protected PushErrorList $errors) {}
 
     public function __invoke(FatalRequestException|RequestException|RateLimitReachedException $exception, int $requestIndex): void
     {

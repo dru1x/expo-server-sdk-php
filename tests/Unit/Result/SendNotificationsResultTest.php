@@ -4,9 +4,9 @@ namespace Dru1x\ExpoPush\Tests\Unit\Result;
 
 use Dru1x\ExpoPush\PushError\PushError;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
 use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
-use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
+use Dru1x\ExpoPush\PushTicket\PushTicketMap;
 use Dru1x\ExpoPush\PushTicket\PushTicketDetails;
 use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
@@ -21,13 +21,13 @@ class SendNotificationsResultTest extends TestCase
     public function has_errors_returns_true_when_errors_are_present(): void
     {
         $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(),
-            errors: new PushErrorCollection(
+            tickets: new PushTicketMap(),
+            errors: new PushErrorList([
                 new PushError(
                     code: PushErrorCode::Failed,
                     message: 'Failed to send push notification',
                 ),
-            ),
+            ]),
         );
 
         $this->assertTrue($result->hasErrors());
@@ -37,8 +37,8 @@ class SendNotificationsResultTest extends TestCase
     public function has_errors_returns_false_when_errors_are_not_present(): void
     {
         $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(),
-            errors: new PushErrorCollection(),
+            tickets: new PushTicketMap(),
+            errors: new PushErrorList(),
         );
 
         $this->assertFalse($result->hasErrors());
@@ -48,13 +48,13 @@ class SendNotificationsResultTest extends TestCase
     public function has_tickets_returns_true_when_tickets_are_present(): void
     {
         $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(
+            tickets: new PushTicketMap([
                 new SuccessfulPushTicket(
                     token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                     receiptId: 'receipt-1',
                 ),
-            ),
-            errors: new PushErrorCollection(),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertTrue($result->hasTickets());
@@ -64,8 +64,8 @@ class SendNotificationsResultTest extends TestCase
     public function has_tickets_returns_false_when_tickets_are_not_present(): void
     {
         $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(),
-            errors: new PushErrorCollection(),
+            tickets: new PushTicketMap(),
+            errors: new PushErrorList(),
         );
 
         $this->assertFalse($result->hasTickets());
@@ -75,13 +75,13 @@ class SendNotificationsResultTest extends TestCase
     public function has_successful_tickets_returns_true_when_successful_tickets_are_present(): void
     {
         $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(
+            tickets: new PushTicketMap([
                 new SuccessfulPushTicket(
                     token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                     receiptId: 'receipt-1',
                 ),
-            ),
-            errors: new PushErrorCollection(),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertTrue($result->hasSuccessfulTickets());
@@ -93,7 +93,7 @@ class SendNotificationsResultTest extends TestCase
         $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
 
         $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(
+            tickets: new PushTicketMap([
                 new FailedPushTicket(
                     token: $token,
                     message: 'Unknown error',
@@ -102,8 +102,8 @@ class SendNotificationsResultTest extends TestCase
                         expoPushToken: $token,
                     ),
                 ),
-            ),
-            errors: new PushErrorCollection(),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertFalse($result->hasSuccessfulTickets());
@@ -115,7 +115,7 @@ class SendNotificationsResultTest extends TestCase
         $token = new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]');
 
         $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(
+            tickets: new PushTicketMap([
                 new FailedPushTicket(
                     token: $token,
                     message: 'Unknown error',
@@ -124,8 +124,8 @@ class SendNotificationsResultTest extends TestCase
                         expoPushToken: $token,
                     ),
                 ),
-            ),
-            errors: new PushErrorCollection(),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertTrue($result->hasFailedTickets());
@@ -135,13 +135,13 @@ class SendNotificationsResultTest extends TestCase
     public function has_failed_tickets_returns_false_when_failed_tickets_are_not_present(): void
     {
         $result = new SendNotificationsResult(
-            tickets: new PushTicketCollection(
+            tickets: new PushTicketMap([
                 new SuccessfulPushTicket(
                     token: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                     receiptId: 'receipt-1',
                 ),
-            ),
-            errors: new PushErrorCollection(),
+            ]),
+            errors: new PushErrorList(),
         );
 
         $this->assertFalse($result->hasFailedTickets());

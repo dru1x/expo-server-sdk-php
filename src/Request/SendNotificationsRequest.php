@@ -3,9 +3,9 @@
 namespace Dru1x\ExpoPush\Request;
 
 use Dru1x\ExpoPush\PushMessage\PushMessage;
-use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
+use Dru1x\ExpoPush\PushMessage\PushMessageList;
 use Dru1x\ExpoPush\PushTicket\FailedPushTicket;
-use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
+use Dru1x\ExpoPush\PushTicket\PushTicketList;
 use Dru1x\ExpoPush\PushTicket\PushTicketDetails;
 use Dru1x\ExpoPush\PushTicket\PushTicketErrorCode;
 use Dru1x\ExpoPush\PushTicket\SuccessfulPushTicket;
@@ -32,7 +32,7 @@ final class SendNotificationsRequest extends Request implements HasBody
 
     protected Method $method = Method::POST;
 
-    public function __construct(protected readonly PushMessageCollection $pushMessages) {}
+    public function __construct(protected readonly PushMessageList $pushMessages) {}
 
     public function resolveEndpoint(): string
     {
@@ -46,10 +46,10 @@ final class SendNotificationsRequest extends Request implements HasBody
      *
      * @param Response $response
      *
-     * @return PushTicketCollection
+     * @return PushTicketList
      * @throws UnexpectedValueException If the response body could not be decoded
      */
-    public function createDtoFromResponse(Response $response): PushTicketCollection
+    public function createDtoFromResponse(Response $response): PushTicketList
     {
         try {
             $data = $response->json('data');
@@ -61,7 +61,7 @@ final class SendNotificationsRequest extends Request implements HasBody
         }
 
         $tokens  = $this->pushMessages->getTokens();
-        $tickets = new PushTicketCollection();
+        $tickets = new PushTicketList();
 
         foreach ($data as $index => $ticketData) {
 
@@ -128,7 +128,7 @@ final class SendNotificationsRequest extends Request implements HasBody
         $this->preventTooManyMessages();
         $this->preventTooMuchMessageData();
 
-        return $this->pushMessages->all();
+        return $this->pushMessages->toArray();
     }
 
     /**

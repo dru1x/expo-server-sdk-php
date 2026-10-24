@@ -2,26 +2,20 @@
 
 namespace Dru1x\ExpoPush\PushMessage;
 
-use Dru1x\ExpoPush\PushToken\PushToken;
-use Dru1x\ExpoPush\PushToken\PushTokenCollection;
-use Dru1x\ExpoPush\Support\Collection;
-use Dru1x\ExpoPush\Support\CollectionMethods;
+use Dru1x\ExpoPush\PushToken\PushTokenList;
+use Dru1x\ExpoPush\Support\Sequence;
+use Dru1x\ExpoPush\Support\SequenceMethods;
 use ValueError;
 
 /**
  * A collection of PushMessage objects
  *
- * @implements Collection<int, PushMessage>
+ * @implements Sequence<int, PushMessage>
  */
-final class PushMessageCollection implements Collection
+final class PushMessageList implements Sequence
 {
-    /** @use CollectionMethods<int, PushMessage> */
-    use CollectionMethods;
-
-    public function __construct(PushMessage ...$pushMessages)
-    {
-        $this->items = $pushMessages;
-    }
+    /** @use SequenceMethods<int, PushMessage> */
+    use SequenceMethods;
 
     /**
      * Count the number of notifications that would be sent by this set of PushMessages
@@ -96,20 +90,24 @@ final class PushMessageCollection implements Collection
     /**
      * Get an ordered collection of all push tokens used by the push messages in this collection
      *
-     * @return PushTokenCollection
+     * @return PushTokenList
      */
-    public function getTokens(): PushTokenCollection
+    public function getTokens(): PushTokenList
     {
         $tokens = [];
 
         foreach ($this->items as $message) {
-            $tokens[] = $message->allTokens()->all();
+            $tokens[] = $message->allTokens()->toArray();
         }
 
-        return new PushTokenCollection(...array_merge(...$tokens));
+        return new PushTokenList(array_merge(...$tokens));
     }
 
     // Internals ----
+    protected function valueIsValid(mixed $value): bool
+    {
+        return $value instanceof PushMessage;
+    }
 
     /**
      * Calculates the amount of space remaining in a chunk of PushMessages.

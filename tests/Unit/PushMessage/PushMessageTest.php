@@ -7,7 +7,7 @@ use Dru1x\ExpoPush\PushMessage\Priority;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
 use Dru1x\ExpoPush\PushMessage\RichContent;
 use Dru1x\ExpoPush\PushToken\PushToken;
-use Dru1x\ExpoPush\PushToken\PushTokenCollection;
+use Dru1x\ExpoPush\PushToken\PushTokenList;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -32,16 +32,16 @@ class PushMessageTest extends TestCase
     public function instantiates_with_multiple_recipients(): void
     {
         $message = new PushMessage(
-            to: new PushTokenCollection(
+            to: new PushTokenList([
                 new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
                 new PushToken('ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]'),
                 new PushToken('ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]'),
-            ),
+            ]),
             title: 'Test Notification',
             body: 'This is a test notification',
         );
 
-        $this->assertInstanceOf(PushTokenCollection::class, $message->to);
+        $this->assertInstanceOf(PushTokenList::class, $message->to);
         $this->assertCount(3, $message->to);
     }
 
@@ -324,7 +324,7 @@ class PushMessageTest extends TestCase
         $message = PushMessage::fromJson($json);
 
         $this->assertInstanceOf(PushMessage::class, $message);
-        $this->assertInstanceOf(PushTokenCollection::class, $message->to);
+        $this->assertInstanceOf(PushTokenList::class, $message->to);
     }
 
     #[Test]

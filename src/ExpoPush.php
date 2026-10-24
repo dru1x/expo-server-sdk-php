@@ -3,12 +3,12 @@
 namespace Dru1x\ExpoPush;
 
 use Dru1x\ExpoPush\Config\RetryConfig;
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
-use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
-use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
+use Dru1x\ExpoPush\PushMessage\PushMessageList;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptMap;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptIdList;
+use Dru1x\ExpoPush\PushTicket\PushTicketMap;
 use Dru1x\ExpoPush\Request\GetReceiptsRequest;
 use Dru1x\ExpoPush\Request\RequestExceptionHandler;
 use Dru1x\ExpoPush\Request\SendNotificationsRequest;
@@ -40,21 +40,21 @@ class ExpoPush
      *
      * This supports request concurrency, with up to 6 requests being sent at once
      *
-     * @param PushMessageCollection|array<PushMessage> $pushMessages
+     * @param PushMessageList|array<PushMessage> $pushMessages
      *
      * @return SendNotificationsResult
      * @throws InvalidPoolItemException
      */
-    public function sendNotifications(PushMessageCollection|array $pushMessages): SendNotificationsResult
+    public function sendNotifications(PushMessageList|array $pushMessages): SendNotificationsResult
     {
         // Ensure push messages are in a collection
         if (is_array($pushMessages)) {
-            $pushMessages = new PushMessageCollection(...$pushMessages);
+            $pushMessages = new PushMessageList($pushMessages);
         }
 
         // Prepare ticket and error collections
-        $tickets = new PushTicketCollection();
-        $errors  = new PushErrorCollection();
+        $tickets = new PushTicketMap();
+        $errors  = new PushErrorList();
 
         // Prepare a new request pool
         $batchSize = SendNotificationsRequest::MAX_NOTIFICATION_COUNT;
@@ -75,7 +75,7 @@ class ExpoPush
             $offset = $requestIndex * $batchSize;
 
             foreach ($batch as $index => $ticket) {
-                $tickets->set($offset + $index, $ticket);
+                $tickets->put($offset + $index, $ticket);
             }
         });
 
@@ -104,21 +104,21 @@ class ExpoPush
      *
      * This supports request concurrency, with up to 6 requests being sent at once
      *
-     * @param PushReceiptIdCollection|array<string> $receiptIds
+     * @param PushReceiptIdList|array<string> $receiptIds
      *
      * @return GetReceiptsResult
      * @throws InvalidPoolItemException
      */
-    public function getReceipts(PushReceiptIdCollection|array $receiptIds): GetReceiptsResult
+    public function getReceipts(PushReceiptIdList|array $receiptIds): GetReceiptsResult
     {
         // Ensure receipt IDs are in a collection
         if (is_array($receiptIds)) {
-            $receiptIds = new PushReceiptIdCollection(...$receiptIds);
+            $receiptIds = new PushReceiptIdList($receiptIds);
         }
 
         // Prepare receipt and error collections
-        $receipts = new PushReceiptCollection();
-        $errors   = new PushErrorCollection();
+        $receipts = new PushReceiptMap();
+        $errors   = new PushErrorList();
 
         // Prepare a new request pool
         $batchSize = GetReceiptsRequest::MAX_RECEIPT_COUNT;
@@ -134,19 +134,14 @@ class ExpoPush
         });
 
         // When a response is received...
-        $pool->withResponseHandler(function (Response $response, int $requestIndex) use ($batchSize, $receipts): void {
-            $batch  = $response->dtoOrFail();
-            $offset = $requestIndex * $batchSize;
-
-            foreach ($batch as $index => $receipt) {
-                $receipts->set($offset + $index, $receipt);
-            }
+        $pool->withResponseHandler(function (Response $response) use ($receipts): void {
+            $receipts->putAll($response->dtoOrFail());
         });
 
         // Send all the requests
         $pool->send()->wait();
 
-        // Merge all the chunks of push receipts into a single collection and return
+        // Merge all the chunks of push receipts into a single map and return
         return new GetReceiptsResult($receipts, $errors);
     }
 
@@ -182,11 +177,11 @@ class ExpoPush
      *
      * @param int                 $batchSize The max number of elements to be sent per request
      * @param int                 $totalCount The total number of elements being sent across all requests
-     * @param PushErrorCollection $errors A collection in which to store any push errors
+     * @param PushErrorList $errors A collection in which to store any push errors
      *
      * @return Pool
      */
-    protected function makeRequestPool(int $batchSize, int $totalCount, PushErrorCollection $errors): Pool
+    protected function makeRequestPool(int $batchSize, int $totalCount, PushErrorList $errors): Pool
     {
         // Make a new pool with a concurrency limit and exception handler
         return $this->connector->pool(

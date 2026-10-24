@@ -82,47 +82,58 @@ outcome. If all retries are exhausted, the failure is recorded as a `PushError`.
 
 ### Sending Push Notifications
 
-Push notifications can be sent by supplying a `PushMessageCollection`, or an array of `PushMessage` objects, to the
+Push notifications can be sent by supplying a `PushMessageList`, or an array of `PushMessage` objects, to the
 `sendNotifications()` method. This automatically chunks the given push messages into an appropriate number of requests 
 and sends them concurrently to Expo's Push API. The max request size, concurrency limit and rate limit are applied as 
 set out in [Expo's Push API documentation](https://docs.expo.dev/push-notifications/sending-notifications/#http2-api). 
-Therefore, the maximum throughput of this method is 600 notifications per second. 
+Therefore, the maximum throughput of this method is 600 notifications per second.
 
 ```php
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
-use Dru1x\ExpoPush\PushMessage\PushMessageCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
 use Dru1x\ExpoPush\PushMessage\PushMessage;
-use Dru1x\ExpoPush\PushTicket\PushTicketCollection;
+use Dru1x\ExpoPush\PushMessage\PushMessageList;
+use Dru1x\ExpoPush\PushTicket\PushTicketMap;
 use Dru1x\ExpoPush\PushToken\PushToken;
 
 // This could also be an array of PushMessage objects
-$messages = new PushMessageCollection(
+$messages = new PushMessageList([
     new PushMessage(
         to: new PushToken('ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'),
         title: 'Hello',
-        body: 'This is a push notification' 
-    )
-);
+        body: 'This is a push notification',
+    ),
+]);
 
 $result = $expoPush->sendNotifications($messages);
 
-/** @var PushTicketCollection $tickets */
+/** @var PushTicketMap $tickets */
 $tickets = $result->tickets;
 
-/** @var PushErrorCollection|null $errors */
+/** @var PushErrorList $errors */
 $errors = $result->errors;
 ```
-The `SendNotificationsResult` object returned by `sendNotifications()` contains a collection of all the resulting 
-`PushTicket` objects, as well as a collection of `PushError` objects representing any 
+
+The `SendNotificationsResult` object returned by `sendNotifications()` contains a map of all the resulting 
+`PushTicket` objects, as well as a list of `PushError` objects representing any 
 [request-level errors](https://docs.expo.dev/push-notifications/sending-notifications/#request-errors) encountered while 
 sending the given batch of notifications.
 
-The `PushTicketCollection` is ordered according to the order of the `PushMessage` objects passed in to 
-`sendNotifications()`. Each `PushTicket` will either be a `SuccessfulPushTicket` or a `FailedPushTicket`, the latter 
-representing a ticket that was returned with a status of "error".
+The `PushTicketMap` is keyed by notification index, following the order of the `PushMessage` objects passed in to 
+`sendNotifications()` (a message with multiple recipients produces one notification, and therefore one ticket, per 
+recipient). Each `PushTicket` will either be a `SuccessfulPushTicket` or a `FailedPushTicket`, the latter representing a 
+ticket that was returned with a status of "error".
 
-If errors were encountered, they will be present in the `PushErrorCollection`, and the `PushTicketCollection` will have 
-a gap in its keys that corresponds to the failed chunk of notifications. Inspect the errors to find out what went wrong.
+```php
+foreach ($result->tickets as $index => $ticket) {
+    if ($ticket->isSuccessful()) {
+        // Store $ticket->receiptId so the receipt can be checked later
+    }
+}
+```
+
+If errors were encountered, they will be present in the `PushErrorList`, and the `PushTicketMap` will have 
+a gap in its keys that corresponds to the failed chunk of notifications. Each `PushError` has a `startIndex` and 
+`endIndex` identifying the affected notifications. Inspect the errors to find out what went wrong.
 
 ### Checking Tickets
 
@@ -130,43 +141,60 @@ Once notifications have been sent, Expo recommends that
 [notification outcomes are checked](https://docs.expo.dev/push-notifications/sending-notifications/#check-push-receipts-for-errors). 
 This is done by fetching `PushReceipt` objects, each identified by an ID included in a previously returned `PushTicket`.
 
-Receipts can be fetched by supplying a `PushReceiptIdCollection`, or an array of push receipt ID strings, to the 
+Receipts can be fetched by supplying a `PushReceiptIdList`, or an array of push receipt ID strings, to the 
 `getReceipts()` method. This also automatically chunks the given receipt IDs into an appropriate number of requests 
 and sends them concurrently to the Expo Push API.
 
 Expo recommends that this is done between 15 minutes and 24 hours after notifications were sent.
 
 ```php
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptIdList;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptMap;
 
 // This could also be an array of receipt ID strings
-$receiptIds = new PushReceiptIdCollection(
+$receiptIds = new PushReceiptIdList([
     'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-);
+]);
 
 $result = $expoPush->getReceipts($receiptIds);
 
-/** @var PushReceiptCollection $receipts */
+/** @var PushReceiptMap $receipts */
 $receipts = $result->receipts;
 
-/** @var PushErrorCollection|null $errors */
+/** @var PushErrorList $errors */
 $errors = $result->errors;
 ```
 
-The `GetReceiptsResult` object returned by `getReceipts()` contains a collection of the resulting `PushReceipt` objects,
-as well as a collection of `PushError` objects representing any 
+The `GetReceiptsResult` object returned by `getReceipts()` contains a map of the resulting `PushReceipt` objects,
+as well as a list of `PushError` objects representing any 
 [request-level errors](https://docs.expo.dev/push-notifications/sending-notifications/#request-errors) encountered while 
 getting the given batch of receipts.
 
-The `PushReceiptCollection` respects the order of receipts returned by the Expo Push API. To find a specific receipt in 
-the collection, the `getById()` method can be used. Each `PushReceipt` with either be a `SuccessfulPushReceipt` or a 
+The `PushReceiptMap` is keyed by receipt ID, so a specific receipt can be found with the `get()` method, or all receipts 
+can be iterated over along with their IDs. Each `PushReceipt` will either be a `SuccessfulPushReceipt` or a 
 `FailedPushReceipt`, the latter representing a receipt that was returned with a status of "error".
 
-If errors were encountered, they will be present in the `PushErrorCollection`, and the `PushReceiptCollection` will have
-a gap in its keys that corresponds to the failed chunk of notifications. Inspect the errors to find out what went wrong.
+```php
+$receipt = $result->receipts->get('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+
+foreach ($result->receipts as $receiptId => $receipt) {
+    if ($receipt->isFailed()) {
+        // Inspect $receipt->message and $receipt->details
+    }
+}
+```
+
+Expo [omits receipts that are not yet available](https://docs.expo.dev/push-notifications/sending-notifications/#check-push-receipts-for-errors), 
+so the map may contain fewer receipts than the number of IDs requested, and `get()` will return `null` for any 
+receipt ID that is missing. If a missing ID isn't covered by a `PushError`, its receipt simply isn't ready yet and can 
+be requested again later.
+
+If errors were encountered, they will be present in the `PushErrorList`, and the receipts for the failed chunk of 
+receipt IDs will be absent from the `PushReceiptMap`. Each `PushError` has a `startIndex` and `endIndex` identifying 
+the affected positions in the list of receipt IDs that was passed to `getReceipts()`. Inspect the errors to find out 
+what went wrong.
 
 ### Further Information
 

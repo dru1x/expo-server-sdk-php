@@ -2,22 +2,23 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushError;
 
-use ArrayIterator;
 use Dru1x\ExpoPush\PushError\PushError;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
-use Dru1x\ExpoPush\PushError\PushErrorCollection;
+use Dru1x\ExpoPush\PushError\PushErrorList;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Traversable;
+use stdClass;
 
-class PushErrorCollectionTest extends TestCase
+class PushErrorListTest extends TestCase
 {
     #[Test]
     public function add_appends_message_to_collection(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
-        );
+        ]);
 
         $collection->add(new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'));
 
@@ -31,42 +32,12 @@ class PushErrorCollectionTest extends TestCase
     }
 
     #[Test]
-    public function set_inserts_message_to_collection_at_index(): void
-    {
-        $collection = new PushErrorCollection();
-
-        $collection->set(9, new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'));
-
-        $this->assertCount(1, $collection);
-
-        $this->assertNull($collection->get(0));
-
-        $this->assertEquals('FAILED', $collection->get(9)->code->value);
-        $this->assertEquals('Push notifications failed to send', $collection->get(9)->message);
-    }
-
-    #[Test]
-    public function set_replaces_message_in_collection_at_index(): void
-    {
-        $collection = new PushErrorCollection(
-            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
-        );
-
-        $collection->set(0, new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'));
-
-        $this->assertCount(1, $collection);
-
-        $this->assertEquals('UNKNOWN', $collection->get(0)->code->value);
-        $this->assertEquals('Unknown error', $collection->get(0)->message);
-    }
-
-    #[Test]
     public function collection_is_iterable(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-        );
+        ]);
 
         foreach ($collection as $error) {
             $this->assertInstanceOf(PushError::class, $error);
@@ -79,7 +50,7 @@ class PushErrorCollectionTest extends TestCase
         $error1 = new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send');
         $error2 = new PushError(code: PushErrorCode::Unknown, message: 'Unknown error');
 
-        $collection = new PushErrorCollection($error1, $error2);
+        $collection = new PushErrorList([$error1, $error2]);
 
         $this->assertTrue($collection->contains($error1));
         $this->assertTrue($collection->contains($error2));
@@ -92,7 +63,7 @@ class PushErrorCollectionTest extends TestCase
         $error2 = new PushError(code: PushErrorCode::Unknown, message: 'Unknown error');
         $error3 = new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token');
 
-        $collection = new PushErrorCollection($error1, $error2);
+        $collection = new PushErrorList([$error1, $error2]);
 
         $this->assertFalse($collection->contains($error3));
     }
@@ -103,7 +74,7 @@ class PushErrorCollectionTest extends TestCase
         $error1 = new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send');
         $error2 = new PushError(code: PushErrorCode::Unknown, message: 'Unknown error');
 
-        $collection = new PushErrorCollection($error1, $error2);
+        $collection = new PushErrorList([$error1, $error2]);
 
         $error = $collection->get(1);
 
@@ -113,10 +84,10 @@ class PushErrorCollectionTest extends TestCase
     #[Test]
     public function get_returns_null_if_push_message_not_found(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-        );
+        ]);
 
         $error = $collection->get(99);
 
@@ -126,11 +97,11 @@ class PushErrorCollectionTest extends TestCase
     #[Test]
     public function count_returns_correct_push_message_count(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
             new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-        );
+        ]);
 
         $this->assertCount(3, $collection);
     }
@@ -138,12 +109,12 @@ class PushErrorCollectionTest extends TestCase
     #[Test]
     public function chunk_returns_correctly_sized_chunks(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
             new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
             new PushError(code: PushErrorCode::PushTooManyNotifications, message: 'Too many notifications'),
-        );
+        ]);
 
         $chunks = $collection->chunk(2);
 
@@ -157,28 +128,29 @@ class PushErrorCollectionTest extends TestCase
     #[Test]
     public function filter_returns_correctly_filtered_collection(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
             new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
             new PushError(code: PushErrorCode::PushTooManyNotifications, message: 'Too many notifications'),
-        );
+        ]);
 
         $filteredCollection = $collection->filter(fn(PushError $error) => $error->code !== PushErrorCode::Failed);
 
         $this->assertCount(3, $filteredCollection);
-        $this->assertNull($filteredCollection->get(0));
+        $this->assertSame(range(0, 2), array_keys($filteredCollection->toArray()));
+        $this->assertSame($collection->get(1), $filteredCollection->get(0));
     }
 
     #[Test]
     public function filter_does_not_affect_original_collection(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
             new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
             new PushError(code: PushErrorCode::PushTooManyNotifications, message: 'Too many notifications'),
-        );
+        ]);
 
         $collection->filter(fn(PushError $error) => $error->code !== PushErrorCode::Failed);
 
@@ -186,29 +158,13 @@ class PushErrorCollectionTest extends TestCase
     }
 
     #[Test]
-    public function values_returns_collection_with_consecutive_keys(): void
-    {
-        $collection = new PushErrorCollection(
-            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
-            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-            new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-        );
-
-        $collection->set(9, new PushError(code: PushErrorCode::PushTooManyNotifications, message: 'Too many notifications'));
-
-        $newCollection = $collection->values();
-
-        $this->assertIsList($newCollection->toArray());
-    }
-
-    #[Test]
     public function to_array_returns_push_message_array(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
             new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-        );
+        ]);
 
         $array = $collection->toArray();
 
@@ -223,11 +179,11 @@ class PushErrorCollectionTest extends TestCase
     #[Test]
     public function json_encode_returns_valid_json_string(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
             new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-        );
+        ]);
 
         $expectedJson = <<<JSON
             [
@@ -261,11 +217,11 @@ class PushErrorCollectionTest extends TestCase
     #[Test]
     public function to_json_returns_valid_json_string(): void
     {
-        $collection = new PushErrorCollection(
+        $collection = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
             new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-        );
+        ]);
 
         $expectedJson = <<<JSON
             [
@@ -297,20 +253,18 @@ class PushErrorCollectionTest extends TestCase
     }
 
     #[Test]
-    public function can_merge_a_collection_with_provided_iterables(): void
+    public function merge_returns_a_new_list_with_values_from_both_lists(): void
     {
-        $collection = PushErrorCollection::make()
-            ->add(new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'))
-            ->merge(
-                new ArrayIterator([
-                    new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-                    new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-                ]),
-                new ArrayIterator([
-                    new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-                    new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-                ]),
-            );
+        $collection = new PushErrorList([
+            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
+        ]);
+
+        $merged = $collection->merge(new PushErrorList([
+            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
+            new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
+            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
+            new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
+        ]));
 
         $this->assertEquals([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
@@ -318,30 +272,18 @@ class PushErrorCollectionTest extends TestCase
             new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
             new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-        ], $collection->all());
-    }
+        ], $merged->toArray());
 
-    #[Test]
-    public function can_retrieve_all_items_from_a_collection(): void
-    {
-        $collection = PushErrorCollection::make(
-            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
-            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-        );
-
-        $this->assertEquals([
-            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
-            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-        ], $collection->all());
+        $this->assertCount(1, $collection);
     }
 
     #[Test]
     public function can_create_an_iterator_from_a_collection(): void
     {
-        $collection = PushErrorCollection::make(
+        $collection = PushErrorList::make([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
             new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-        );
+        ]);
 
         $iterator = $collection->getIterator();
 
@@ -361,11 +303,11 @@ class PushErrorCollectionTest extends TestCase
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = new PushErrorCollection();
+        $empty = new PushErrorList();
 
-        $notEmpty = new PushErrorCollection(
+        $notEmpty = new PushErrorList([
             new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
-        );
+        ]);
 
         $this->assertTrue(
             $empty->isEmpty(),
@@ -377,21 +319,20 @@ class PushErrorCollectionTest extends TestCase
     }
 
     #[Test]
-    public function reject_returns_correctly_filtered_collection(): void
+    public function constructor_throws_exception_for_invalid_value(): void
     {
-        $collection = new PushErrorCollection(
-            new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'),
-            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-            new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-            new PushError(code: PushErrorCode::Unknown, message: 'Unknown error'),
-            new PushError(code: PushErrorCode::Unauthorized, message: 'Invalid authentication token'),
-        );
+        $this->expectException(InvalidArgumentException::class);
 
-        $filteredCollection = $collection->reject(
-            fn(PushError $error) => $error->code === PushErrorCode::Unknown,
-        );
+        new PushErrorList([new PushError(code: PushErrorCode::Failed, message: 'Push notifications failed to send'), new stdClass()]);
+    }
 
-        $this->assertCount(3, $filteredCollection);
-        $this->assertNull($filteredCollection->get(1));
+    #[Test]
+    public function add_throws_exception_for_invalid_value(): void
+    {
+        $collection = new PushErrorList();
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $collection->add(new stdClass());
     }
 }

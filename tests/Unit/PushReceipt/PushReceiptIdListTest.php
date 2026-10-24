@@ -2,18 +2,20 @@
 
 namespace Dru1x\ExpoPush\Tests\Unit\PushReceipt;
 
-use ArrayIterator;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptIdList;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Traversable;
+use stdClass;
 
-class PushReceiptIdCollectionTest extends TestCase
+class PushReceiptIdListTest extends TestCase
 {
     #[Test]
     public function add_appends_receipt_id_to_collection(): void
     {
-        $collection = new PushReceiptIdCollection('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+        $collection = new PushReceiptIdList(['XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX']);
 
         $collection->add('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
 
@@ -24,36 +26,13 @@ class PushReceiptIdCollectionTest extends TestCase
     }
 
     #[Test]
-    public function set_inserts_receipt_id_to_collection_at_index(): void
-    {
-        $collection = new PushReceiptIdCollection();
-
-        $collection->set(9, 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
-
-        $this->assertCount(1, $collection);
-        $this->assertNull($collection->get(0));
-        $this->assertEquals('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $collection->get(9));
-    }
-
-    #[Test]
-    public function set_replaces_receipt_id_in_collection_at_index(): void
-    {
-        $collection = new PushReceiptIdCollection('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
-
-        $collection->set(0, 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY');
-
-        $this->assertCount(1, $collection);
-        $this->assertEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $collection->get(0));
-    }
-
-    #[Test]
     public function collection_is_iterable(): void
     {
-        $collection = new PushReceiptIdCollection(
+        $collection = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-        );
+        ]);
 
         foreach ($collection as $receipt) {
             $this->assertIsString($receipt);
@@ -67,7 +46,7 @@ class PushReceiptIdCollectionTest extends TestCase
         $receipt2 = 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY';
         $receipt3 = 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ';
 
-        $collection = new PushReceiptIdCollection($receipt1, $receipt2, $receipt3);
+        $collection = new PushReceiptIdList([$receipt1, $receipt2, $receipt3]);
 
         $this->assertTrue($collection->contains($receipt1));
         $this->assertTrue($collection->contains($receipt2));
@@ -80,7 +59,7 @@ class PushReceiptIdCollectionTest extends TestCase
         $receipt2 = 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY';
         $receipt3 = 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ';
 
-        $collection = new PushReceiptIdCollection($receipt1, $receipt2);
+        $collection = new PushReceiptIdList([$receipt1, $receipt2]);
 
         $this->assertFalse($collection->contains($receipt3));
     }
@@ -91,7 +70,7 @@ class PushReceiptIdCollectionTest extends TestCase
         $receipt1 = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
         $receipt2 = 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY';
 
-        $collection = new PushReceiptIdCollection($receipt1, $receipt2);
+        $collection = new PushReceiptIdList([$receipt1, $receipt2]);
 
         $receipt = $collection->get(1);
 
@@ -101,10 +80,10 @@ class PushReceiptIdCollectionTest extends TestCase
     #[Test]
     public function get_returns_null_if_push_receipt_id_not_found(): void
     {
-        $collection = new PushReceiptIdCollection(
+        $collection = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-        );
+        ]);
 
         $receipt = $collection->get(99);
 
@@ -114,11 +93,11 @@ class PushReceiptIdCollectionTest extends TestCase
     #[Test]
     public function count_returns_correct_push_receipt_id_count(): void
     {
-        $collection = new PushReceiptIdCollection(
+        $collection = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-        );
+        ]);
 
         $this->assertCount(3, $collection);
     }
@@ -126,14 +105,14 @@ class PushReceiptIdCollectionTest extends TestCase
     #[Test]
     public function chunk_returns_correctly_sized_chunks(): void
     {
-        $collection = new PushReceiptIdCollection(
+        $collection = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
             'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
             'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
             'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
-        );
+        ]);
 
         $chunks = $collection->chunk(2);
 
@@ -147,34 +126,35 @@ class PushReceiptIdCollectionTest extends TestCase
     #[Test]
     public function filter_returns_correctly_filtered_collection(): void
     {
-        $collection = new PushReceiptIdCollection(
+        $collection = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
             'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
             'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
             'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
-        );
+        ]);
 
         $filteredCollection = $collection->filter(
             fn(string $receiptId) => $receiptId !== 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
         );
 
         $this->assertCount(5, $filteredCollection);
-        $this->assertNotEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $filteredCollection->get(1));
+        $this->assertSame(range(0, 4), array_keys($filteredCollection->toArray()));
+        $this->assertSame($collection->get(2), $filteredCollection->get(1));
     }
 
     #[Test]
     public function filter_does_not_affect_original_collection(): void
     {
-        $collection = new PushReceiptIdCollection(
+        $collection = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
             'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
             'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
             'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
-        );
+        ]);
 
         $collection->filter(
             fn(string $receiptId) => $receiptId !== 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
@@ -184,28 +164,13 @@ class PushReceiptIdCollectionTest extends TestCase
     }
 
     #[Test]
-    public function values_returns_collection_with_consecutive_keys(): void
-    {
-        $collection = new PushReceiptIdCollection(
-            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-        );
-
-        $collection->set(9, 'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ');
-
-        $newCollection = $collection->values();
-
-        $this->assertIsList($newCollection->toArray());
-    }
-
-    #[Test]
     public function to_array_returns_push_receipt_id_array(): void
     {
-        $collection = new PushReceiptIdCollection(
+        $collection = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-        );
+        ]);
 
         $array = $collection->toArray();
 
@@ -220,11 +185,11 @@ class PushReceiptIdCollectionTest extends TestCase
     #[Test]
     public function json_encode_returns_valid_json_string(): void
     {
-        $collection = new PushReceiptIdCollection(
+        $collection = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-        );
+        ]);
 
         $expectedJson = <<<JSON
             [
@@ -240,11 +205,11 @@ class PushReceiptIdCollectionTest extends TestCase
     #[Test]
     public function to_json_returns_valid_json_string(): void
     {
-        $collection = new PushReceiptIdCollection(
+        $collection = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-        );
+        ]);
 
         $expectedJson = <<<JSON
             [
@@ -258,21 +223,19 @@ class PushReceiptIdCollectionTest extends TestCase
     }
 
     #[Test]
-    public function can_merge_a_collection_with_provided_iterables(): void
+    public function merge_returns_a_new_list_with_values_from_both_lists(): void
     {
-        $collection = PushReceiptIdCollection::make()
-            ->add('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX')
-            ->add('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY')
-            ->merge(
-                new ArrayIterator([
-                    'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-                    'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
-                ]),
-                new ArrayIterator([
-                    'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
-                    'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
-                ]),
-            );
+        $collection = new PushReceiptIdList([
+            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+        ]);
+
+        $merged = $collection->merge(new PushReceiptIdList([
+            'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
+            'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
+            'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
+        ]));
 
         $this->assertSame([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -281,30 +244,18 @@ class PushReceiptIdCollectionTest extends TestCase
             'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
             'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
             'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
-        ], $collection->all());
-    }
+        ], $merged->toArray());
 
-    #[Test]
-    public function can_retrieve_all_items_from_a_collection(): void
-    {
-        $collection = PushReceiptIdCollection::make(
-            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-        );
-
-        $this->assertSame([
-            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-        ], $collection->all());
+        $this->assertCount(2, $collection);
     }
 
     #[Test]
     public function can_create_an_iterator_from_a_collection(): void
     {
-        $collection = PushReceiptIdCollection::make(
+        $collection = PushReceiptIdList::make([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-        );
+        ]);
 
         $iterator = $collection->getIterator();
 
@@ -324,8 +275,8 @@ class PushReceiptIdCollectionTest extends TestCase
     #[Test]
     public function can_check_if_a_collection_is_empty(): void
     {
-        $empty = new PushReceiptIdCollection();
-        $notEmpty = new PushReceiptIdCollection('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+        $empty = new PushReceiptIdList();
+        $notEmpty = new PushReceiptIdList(['XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX']);
 
         $this->assertTrue(
             $empty->isEmpty(),
@@ -337,22 +288,33 @@ class PushReceiptIdCollectionTest extends TestCase
     }
 
     #[Test]
-    public function reject_returns_correctly_filtered_collection(): void
+    #[DataProvider('invalidReceiptIdProvider')]
+    public function add_throws_exception_for_invalid_receipt_id(mixed $receiptId): void
     {
-        $collection = new PushReceiptIdCollection(
-            'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-            'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-            'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
-            'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB',
-            'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC',
-        );
+        $collection = new PushReceiptIdList();
 
-        $filteredCollection = $collection->reject(
-            fn(string $receiptId) => $receiptId === 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-        );
+        $this->expectException(InvalidArgumentException::class);
 
-        $this->assertCount(5, $filteredCollection);
-        $this->assertNotEquals('YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY', $filteredCollection->get(1));
+        $collection->add($receiptId);
+    }
+
+    #[Test]
+    #[DataProvider('invalidReceiptIdProvider')]
+    public function constructor_throws_exception_for_invalid_receipt_id(mixed $receiptId): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new PushReceiptIdList(['XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', $receiptId]);
+    }
+
+    public static function invalidReceiptIdProvider(): array
+    {
+        return [
+            'empty string'      => [''],
+            'whitespace string' => ['   '],
+            'integer'           => [123],
+            'null'              => [null],
+            'object'            => [new stdClass()],
+        ];
     }
 }

@@ -4,8 +4,10 @@
 
 use Dru1x\ExpoPush\ExpoPush;
 use Dru1x\ExpoPush\PushError\PushErrorCode;
+use Dru1x\ExpoPush\PushReceipt\FailedPushReceipt;
 use Dru1x\ExpoPush\PushReceipt\PushReceipt;
-use Dru1x\ExpoPush\PushReceipt\PushReceiptIdCollection;
+use Dru1x\ExpoPush\PushReceipt\PushReceiptIdList;
+use Dru1x\ExpoPush\PushReceipt\SuccessfulPushReceipt;
 use Dru1x\ExpoPush\Request\GetReceiptsRequest;
 use Dru1x\ExpoPush\Support\PushStatus;
 use PHPUnit\Framework\Attributes\Test;
@@ -51,11 +53,11 @@ class GetReceiptsTest extends TestCase
             ),
         );
 
-        $receiptIds = new PushReceiptIdCollection(
+        $receiptIds = new PushReceiptIdList([
             'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
             'ZZZZZZZZ-ZZZZ-ZZZZ-ZZZZ-ZZZZZZZZZZZZ',
-        );
+        ]);
 
         $result = $this->service->getReceipts($receiptIds);
 
@@ -109,7 +111,7 @@ class GetReceiptsTest extends TestCase
     #[Test]
     public function get_receipts_does_not_send_requests_for_empty_collection(): void
     {
-        $result = $this->service->getReceipts(new PushReceiptIdCollection());
+        $result = $this->service->getReceipts(new PushReceiptIdList());
 
         $this->mockClient->assertSentCount(0, GetReceiptsRequest::class);
 
@@ -118,7 +120,7 @@ class GetReceiptsTest extends TestCase
     }
 
     #[Test]
-    public function get_receipts_leaves_index_gaps_for_request_errors(): void
+    public function get_receipts_omits_receipts_for_request_errors(): void
     {
         $receiptIds = $this->generatePushReceiptIds(10000);
 
@@ -164,14 +166,91 @@ class GetReceiptsTest extends TestCase
 
         $this->assertCount(9000, $result->receipts);
 
-        $this->assertInstanceOf(PushReceipt::class, $result->receipts->get(499));
-        $this->assertNull($result->receipts->get(5000));
-        $this->assertNull($result->receipts->get(5999));
-        $this->assertInstanceOf(PushReceipt::class, $result->receipts->get(600));
+        $ids = $receiptIds->toArray();
+
+        $this->assertInstanceOf(PushReceipt::class, $result->receipts->get($ids[4999]));
+        $this->assertNull($result->receipts->get($ids[5000]));
+        $this->assertNull($result->receipts->get($ids[5999]));
+        $this->assertInstanceOf(PushReceipt::class, $result->receipts->get($ids[6000]));
+
+        foreach ($result->receipts as $id => $receipt) {
+            $this->assertSame($id, $receipt->id);
+        }
 
         $this->assertTrue($result->hasErrors());
         $this->assertCount(1, $result->errors);
-        $this->assertEquals(PushErrorCode::PushTooManyReceipts, $result->errors->get(0)->code);
+
+        $error = $result->errors->get(0);
+        $this->assertEquals(PushErrorCode::PushTooManyReceipts, $error->code);
+        $this->assertEquals(5000, $error->startIndex);
+        $this->assertEquals(5999, $error->endIndex);
+    }
+
+    #[Test]
+    public function get_receipts_keys_receipts_by_id_when_expo_omits_receipts_that_are_not_ready(): void
+    {
+        $receiptIds = $this->generatePushReceiptIds(2500);
+
+        $omittedIds = [];
+        $failedIds  = [];
+
+        foreach (array_chunk($receiptIds->toArray(), GetReceiptsRequest::MAX_RECEIPT_COUNT, preserve_keys: true) as $chunk) {
+            $data = [];
+
+            foreach ($chunk as $index => $id) {
+
+                // Expo omits receipts that aren't ready yet, rather than returning them as null
+                if ($index % 7 === 3) {
+                    $omittedIds[] = $id;
+                    continue;
+                }
+
+                if ($index % 5 === 0) {
+                    $failedIds[] = $id;
+                    $data[$id]   = [
+                        'status'  => 'error',
+                        'message' => '"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]" is not a registered push notification recipient',
+                        'details' => [
+                            'error'         => 'DeviceNotRegistered',
+                            'expoPushToken' => 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+                        ],
+                    ];
+                    continue;
+                }
+
+                $data[$id] = ['status' => 'ok'];
+            }
+
+            $this->mockClient->addResponse(
+                MockResponse::make(
+                    body: ['data' => $data],
+                    headers: ['Content-Type' => 'application/json'],
+                ),
+            );
+        }
+
+        $result = $this->service->getReceipts($receiptIds);
+
+        $this->mockClient->assertSentCount(3, GetReceiptsRequest::class);
+
+        $this->assertFalse($result->hasErrors());
+        $this->assertCount(2500 - count($omittedIds), $result->receipts);
+
+        foreach ($result->receipts as $id => $receipt) {
+            $this->assertSame($id, $receipt->id);
+        }
+
+        foreach ($omittedIds as $id) {
+            $this->assertNull($result->receipts->get($id));
+        }
+
+        foreach ($failedIds as $id) {
+            $this->assertInstanceOf(FailedPushReceipt::class, $result->receipts->get($id));
+        }
+
+        foreach (array_diff($receiptIds->toArray(), $omittedIds, $failedIds) as $id) {
+            $this->assertInstanceOf(SuccessfulPushReceipt::class, $result->receipts->get($id));
+        }
     }
 
     #[Test]
@@ -282,7 +361,7 @@ class GetReceiptsTest extends TestCase
 
     // Helpers ----
 
-    protected function generatePushReceiptIds(int $count): PushReceiptIdCollection
+    protected function generatePushReceiptIds(int $count): PushReceiptIdList
     {
         $receiptIds = [];
 
@@ -290,7 +369,7 @@ class GetReceiptsTest extends TestCase
             $receiptIds[] = $this->generatePushReceiptId();
         }
 
-        return new PushReceiptIdCollection(...$receiptIds);
+        return new PushReceiptIdList($receiptIds);
     }
 
     protected function generatePushReceiptId(): string

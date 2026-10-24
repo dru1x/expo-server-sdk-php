@@ -2,24 +2,19 @@
 
 namespace Dru1x\ExpoPush\PushToken;
 
-use Dru1x\ExpoPush\Support\Collection;
-use Dru1x\ExpoPush\Support\CollectionMethods;
+use Dru1x\ExpoPush\Support\Sequence;
+use Dru1x\ExpoPush\Support\SequenceMethods;
 use InvalidArgumentException;
 
 /**
  * A collection of PushToken objects
  *
- * @implements Collection<int, PushToken>
+ * @implements Sequence<int, PushToken>
  */
-final class PushTokenCollection implements Collection
+final class PushTokenList implements Sequence
 {
-    /** @use CollectionMethods<int, PushToken> */
-    use CollectionMethods;
-
-    public function __construct(PushToken ...$pushTokens)
-    {
-        $this->items = $pushTokens;
-    }
+    /** @use SequenceMethods<int, PushToken> */
+    use SequenceMethods;
 
     /**
      * @param array<string> $data
@@ -28,7 +23,7 @@ final class PushTokenCollection implements Collection
     {
         $tokens = array_map(PushToken::fromString(...), $data);
 
-        return new self(...$tokens);
+        return new self($tokens);
     }
 
     /**
@@ -45,7 +40,13 @@ final class PushTokenCollection implements Collection
         }
 
         return new self(
-            ...array_splice($this->items, 0, $count),
+            array_splice($this->items, 0, $count),
         );
+    }
+
+    // Internals ----
+    protected function valueIsValid(mixed $value): bool
+    {
+        return $value instanceof PushToken;
     }
 }

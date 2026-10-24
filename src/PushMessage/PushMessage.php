@@ -3,7 +3,7 @@
 namespace Dru1x\ExpoPush\PushMessage;
 
 use Dru1x\ExpoPush\PushToken\PushToken;
-use Dru1x\ExpoPush\PushToken\PushTokenCollection;
+use Dru1x\ExpoPush\PushToken\PushTokenList;
 use Dru1x\ExpoPush\Support\ConvertsFromJson;
 use Dru1x\ExpoPush\Support\ConvertsToJson;
 use InvalidArgumentException;
@@ -18,25 +18,25 @@ final readonly class PushMessage implements JsonSerializable
      * @param array<mixed>|object|null $data
      */
     public function __construct(
-        public PushTokenCollection|PushToken $to,
-        public ?string                       $title = null,
-        public ?string                       $subtitle = null,
-        public ?string                       $body = null,
-        public ?int                          $ttl = null,
-        public array|object|null             $data = null,
-        public ?int                          $expiration = null,
-        public ?Priority                     $priority = null,
-        public ?string                       $sound = null,
-        public ?int                          $badge = null,
-        public ?InterruptionLevel            $interruptionLevel = null,
-        public ?string                       $channelId = null,
-        public ?string                       $icon = null,
-        public ?RichContent                  $richContent = null,
-        public ?string                       $categoryId = null,
-        public ?string                       $collapseId = null,
-        public ?string                       $tag = null,
-        public ?bool                         $mutableContent = null,
-        public ?bool                         $_contentAvailable = null,
+        public PushTokenList|PushToken $to,
+        public ?string                 $title = null,
+        public ?string                 $subtitle = null,
+        public ?string                 $body = null,
+        public ?int                    $ttl = null,
+        public array|object|null       $data = null,
+        public ?int                    $expiration = null,
+        public ?Priority               $priority = null,
+        public ?string                 $sound = null,
+        public ?int                    $badge = null,
+        public ?InterruptionLevel      $interruptionLevel = null,
+        public ?string                 $channelId = null,
+        public ?string                 $icon = null,
+        public ?RichContent            $richContent = null,
+        public ?string                 $categoryId = null,
+        public ?string                 $collapseId = null,
+        public ?string                 $tag = null,
+        public ?bool                   $mutableContent = null,
+        public ?bool                   $_contentAvailable = null,
     ) {}
 
     // Helpers ----
@@ -44,11 +44,11 @@ final readonly class PushMessage implements JsonSerializable
     /**
      * Make a copy of this PushMessage, optionally overriding the recipients
      *
-     * @param PushTokenCollection|PushToken|null $to
+     * @param PushTokenList|PushToken|null $to
      *
      * @return self
      */
-    public function copy(PushTokenCollection|PushToken|null $to = null): self
+    public function copy(PushTokenList|PushToken|null $to = null): self
     {
         return new PushMessage(
             to: $to ?? clone $this->to,
@@ -86,13 +86,13 @@ final readonly class PushMessage implements JsonSerializable
     /**
      * Get all the push tokens to which this PushMessage will be sent.
      *
-     * This will always return a PushTokenCollection, even if only a single PushToken has been supplied.
+     * This will always return a PushTokenList, even if only a single PushToken has been supplied.
      */
-    public function allTokens(): PushTokenCollection
+    public function allTokens(): PushTokenList
     {
-        return $this->to instanceof PushTokenCollection
-            ? PushTokenCollection::fromIterable($this->to)
-            : PushTokenCollection::make($this->to);
+        return $this->to instanceof PushTokenList
+            ? PushTokenList::make($this->to)
+            : new PushTokenList([$this->to]);
     }
 
     // Internals ----
@@ -121,7 +121,7 @@ final readonly class PushMessage implements JsonSerializable
         }
 
         $data['to'] = is_array($data['to'])
-            ? PushTokenCollection::fromArray($data['to'])
+            ? PushTokenList::fromArray($data['to'])
             : PushToken::fromString($data['to']);
 
         if (isset($data['priority'])) {
